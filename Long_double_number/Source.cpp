@@ -71,28 +71,82 @@ public:
                 n = 0;
             }
         }
-        lint sdvik=(accuracy-n) / loginf;
-        v.resize(v.size() + sdvik);
-        for (lint i = v.size() - 1; i >= sdvik; --i) {
-            v[i] = v[i - sdvik];
+        formatting();
+    }
+    void formatting() {
+        if (n <= accuracy) {
+            lint sdvik = (accuracy - n) / loginf;
+            v.resize(v.size() + sdvik);
+            for (lint i = v.size() - 1; i >= sdvik; --i) {
+                v[i] = v[i - sdvik];
+            }
+            for (lint i = 0; i < sdvik; ++i) {
+                v[i] = 0;
+            }
+            n += sdvik * loginf;
+            for (lint i = 0; i<accuracy - n; ++i) {
+                *this *= 10;
+            }
+            n += accuracy - n;
         }
-        for (lint i = 0; i < sdvik; ++i) {
-            v[i] = 0;
+        else {
+            lint sdvik = (n-accuracy) / loginf;
+            for (lint i = v.size() - 1; i > sdvik; --i) {
+                v[i - sdvik]=v[i];
+                v[i]=0;
+            }
+            n -= sdvik * loginf;
+            for (lint i = 0;i< n - accuracy; ++i) {
+                *this /= 10;
+            }
+            n -= n - accuracy;
+            v.resize(v.size() - sdvik);
         }
-        n += sdvik * loginf;
+    }
+    bool sng() {
+        for (lint i = 0; i < v.size(); ++i) {
+            if (v[i] != 0) {
+                if (v[i] > 0) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     string convert_to_string() {
         string s;
+        Double nul("0");
+        bool minus = false;
+        if (!sng()) {
+            minus = true;
+            *this *= -1;
+        }
         lint kol = to_string(v[v.size() - 1]).size();
         kol = (v[v.size() - 1] < 0 ? kol - 1 : kol)+(loginf*(v.size()-1))-n;
+        bool flag = false;
+        lint point = 0;
         for (lint i = v.size()-1; i >=0; --i) {
             lint a = v[i];
-            string b="";
+            string b="",bb="";
+            point = 0;
+            bool h = false;
             while (a)
             {
                 b += to_string(a % 10);
                 a /= 10;
+                ++point;
+                h = true;
             }
+            if (flag) {
+                for (lint i = 0; i < loginf - point; ++i) {
+                    bb += "0";
+                }
+            }
+            flag = h;
+            b += bb;
             reverse(b.begin(), b.end());
             s += b;
         }
@@ -111,6 +165,9 @@ public:
             s.insert(0, dop);
             s.insert(0, ".");
             s.insert(0, "0");
+        }
+        if (minus) {
+            s.insert(0, "-");
         }
         return s;
     }
@@ -165,18 +222,20 @@ public:
                 v.push_back(v[v.size() - 1] / inf);
                 v[v.size() - 2] %= inf;
             }
-            bool l = true;
-            for (lint i = lint(v.size() - 1); l && i > 0; --i) {
-                if (v[i] == 0) {
-                    v.pop_back();
-                }
-                else {
-                    l = false;
-                }
-            }
+            //bool l = true;
+            //for (lint i = lint(v.size() - 1); l && i > 0; --i) {
+            //    if (v[i] == 0) {
+            //        v.pop_back();
+            //    }
+            //    else {
+            //        l = false;
+            //    }
+            //}
+            //Double nul("0");
             if (v.size() >= 2) {
-                if (v[v.size() - 1] < 0) {
-                    for (lint i = v.size() - 2; i >= 0; --i) {
+                //if (*this < nul) {
+                if (v[v.size()-1]<0){
+                    for (lint i = 0; i < v.size()-1; ++i) {
                         if (v[i] > 0) {
                             v[i] -= inf;
                             ++v[i + 1];
@@ -185,9 +244,13 @@ public:
                 }
                 else {
                     for (lint i = v.size() - 2; i >= 0; --i) {
-                        if (v[i] < 0) {
                             v[i] += inf;
                             --v[i + 1];
+                    }
+                    for (lint i = 0; i < v.size()-1; ++i) {
+                        if (v[i] >= inf) {
+                            v[i] -= inf;
+                            ++v[i + 1];
                         }
                     }
                 }
@@ -214,6 +277,79 @@ public:
                 }
                 else if (v[i] > b.v[i]) {
                     return  false;
+                }
+            }
+        }
+        return  false;
+    }
+    bool operator <= (const Double& b) {
+        if (v.size() < b.v.size()) {
+            return  true;
+        }
+        else if (v.size() > b.v.size()) {
+            return  false;
+        }
+        else {
+            for (lint i = v.size() - 1; i >= 0; --i) {
+                if (v[i] < b.v[i]) {
+                    return  true;
+                }
+                else if (v[i] > b.v[i]) {
+                    return  false;
+                }
+            }
+        }
+        return  true;
+    }
+    bool operator > (const Double& b) {
+        if (v.size() > b.v.size()) {
+            return  true;
+        }
+        else if (v.size() < b.v.size()) {
+            return  false;
+        }
+        else {
+            for (lint i = v.size() - 1; i >= 0; --i) {
+                if (v[i] > b.v[i]) {
+                    return  true;
+                }
+                else if (v[i] < b.v[i]) {
+                    return  false;
+                }
+            }
+        }
+        return  false;
+    }
+    bool operator >= (const Double& b) {
+        if (v.size() > b.v.size()) {
+            return  true;
+        }
+        else if (v.size() < b.v.size()) {
+            return  false;
+        }
+        else {
+            for (lint i = v.size() - 1; i >= 0; --i) {
+                if (v[i] > b.v[i]) {
+                    return  true;
+                }
+                else if (v[i] < b.v[i]) {
+                    return  false;
+                }
+            }
+        }
+        return  true;
+    }
+    bool operator != (const Double& b) {
+        if (v.size() > b.v.size()) {
+            return  true;
+        }
+        else if (v.size() < b.v.size()) {
+            return  true;
+        }
+        else {
+            for (lint i = v.size() - 1; i >= 0; --i) {
+                if (v[i] != b.v[i]) {
+                    return  true;
                 }
             }
         }
@@ -259,6 +395,7 @@ public:
                     h = true;
                 }
             };
+            
             return true;
         }
         catch (...)
@@ -306,6 +443,7 @@ public:
                 }
             }
             otw.n = this->n + b.n;
+            otw.formatting();
             return otw;
         }
         catch (...)
@@ -377,6 +515,22 @@ public:
         }
         v[0] /= 2;
     }
+    bool operator /= (lint k) {
+        try
+        {
+            for (lint i = v.size() - 1; i > 0; --i) {
+                v[i - 1] += (v[i] % k) * inf;
+                v[i] /= k;
+            }
+            v[0] /= k;
+            return true;
+        }
+        catch (...)
+        {
+            std::cout << "Error_operation+" << std::endl;
+            return false;
+        }
+    }
     void labs() {
         if (v[0] < 0) {
             for (lint i = 0; i < v.size(); ++i) {
@@ -384,66 +538,89 @@ public:
             }
         }
     }
+    Double min_element_abs() {
+        string str_c = "0.";
+        for (lint i = 0; i < accuracy - 2; ++i) {
+            str_c += "0";
+        }
+        str_c += "1";
+        Double c(str_c);
+        return c;
+    }
+    Double max_element_abs() {
+        string str_c = "";
+        for (lint i = 0; i < 4; ++i) {
+            str_c += "0";
+        }
+        str_c += "1";
+        reverse(str_c.begin(), str_c.end());
+        Double c(str_c);
+        return c;
+    }
     Double operator / (Double& b) {
         
-        Double otw;
-        if (v[0] != 0 || v.size() > 1) {
-            Double c, l, r, rr, mid, dop, dop1, nul("0");
-            l.n = 0;
-            l.v.push_back(-1);
-            c.n = 0;
-            c.v.push_back(1);
-            r.copy(*this);
-            rr = r;
-            while (rr[0] != 0 || rr.size() > 1) {
-                mid = r;
-                mid += l;
+        Double otw,nul("0");
+        if (*this != nul) {
+            Double l("-1"), r, mid,dopl("0"), dopr("0");
+            Double c = min_element_abs();
+            r = max_element_abs();
+            while ((r-l)>c) {
+                mid = (r+l);
                 mid.div2();
-                dop = nul;
-                dop = mid * b;
-                dop -= *this;
-                if (dop[0] >= 0) {
+                if ((mid * b) >= *this) {
                     r = mid;
                 }
                 else {
                     l = mid;
                 }
-                rr = r;
-                rr -= l;
-                rr -= c;
             }
-            dop = nul;
-            dop = r * b;
-            dop -= *this;
-            if (dop[0] > 0) {
+            dopr = ((r * b)-*this);
+            dopr.labs();
+            dopl = ((l * b) - *this);
+            dopl.labs();
+            if (dopr >dopl) {
                 otw = l;
             }
             else {
-                dop.labs();
-                dop1 = nul;
-                dop1 = l * b;
-                dop1 -= *this;
-                dop1.labs();
-                dop -= dop1;
-                if (dop[0] >= 0) {
-                    otw = l;
-                }
-                else {
-                    otw = r;
-                }
+                otw = r;
             }
         }
+        otw.n = this->n;
         return otw;
     }
     Double asin() {
-        vector<Double> kef = { Double("1.0"), Double("0.166667"), Double("0.075"), Double("0.0446429"), Double("0.0303819"), Double("0.0223722"), Double("0.0173528"), Double("0.0139648"), Double("0.0115518"), Double("0.00976161"), Double("0.00839034"), Double("0.00731253"), Double("0.00644721"), Double("0.00574004"), Double("0.00515331"), Double("0.00466014"), Double("0.00424091"), Double("0.00388096"), Double("0.00356921"), Double("0.00329706"), Double("0.00305782"), Double("0.00284618"), Double("0.00265787"), Double("0.00248945"), Double("0.00233809"), Double("0.00220147"), Double("0.00207766"), Double("0.00196503"), Double("0.00186223"), Double("0.00176808"), Double("0.00168161"), Double("0.00160196"), Double("0.00152841"), Double("0.00146032"), Double("0.00139714"), Double("0.00133839"), Double("0.00128364"), Double("0.00123253"), Double("0.00118472"), Double("0.00113992"), Double("0.00109788"), Double("0.00105835"), Double("0.00102115"), Double("0.000986073"), Double("0.000952961"), Double("0.000921661"), Double("0.000892037"), Double("0.000863968"), Double("0.00083734"), Double("0.000812052"), Double("0.000788012"), Double("0.000765135"), Double("0.000743344"), Double("0.000722569"), Double("0.000702743"), Double("0.000683807"), Double("0.000665707"), Double("0.000648392"), Double("0.000631814"), Double("0.000615931"), Double("0.000600702"), Double("0.000586091"), Double("0.000572063"), Double("0.000558585"), Double("0.000545629"), Double("0.000533165"), Double("0.000521169"), Double("0.000509617"), Double("0.000498485"), Double("0.000487752"), Double("0.000477399"), Double("0.000467407"), Double("0.000457759"), Double("0.000448438"), Double("0.00043943"), Double("0.000430719"), Double("0.000422292"), Double("0.000414136"), Double("0.000406239"), Double("0.000398591"), Double("0.000391179"), Double("0.000383994"), Double("0.000377027"), Double("0.000370267"), Double("0.000363708"), Double("0.000357339"), Double("0.000351155"), Double("0.000345146"), Double("0.000339308"), Double("0.000333632"), Double("0.000328112"), Double("0.000322743"), Double("0.000317519"), Double("0.000312434"), Double("0.000307484"), Double("0.000302662"), Double("0.000297966"), Double("0.00029339"), Double("0.000288929"), Double("0.000284581"), Double("0.000280341"), Double("0.000276205"), Double("0.000272169"), Double("0.000268231"), Double("0.000264387"), Double("0.000260634"), Double("0.000256969"), Double("0.000253389"), Double("0.000249891"), Double("0.000246473"), Double("0.000243132"), Double("0.000239867"), Double("0.000236673"), Double("0.00023355"), Double("0.000230495"), Double("0.000227506"), Double("0.000224581"), Double("0.000221718"), Double("0.000218915"), Double("0.000216171"), Double("0.000213484"), Double("0.000210852"), Double("0.000208274"), Double("0.000205747"), Double("0.000203272"), Double("0.000200845"), Double("0.000198467"), Double("0.000196135"), Double("0.000193849"), Double("0.000191606"), Double("0.000189407"), Double("0.000187249"), Double("0.000185132"), Double("0.000183054"), Double("0.000181015"), Double("0.000179014"), Double("0.000177049"), Double("0.00017512"), Double("0.000173226"), Double("0.000171365"), Double("0.000169538"), Double("0.000167743"), Double("0.000165979"), Double("0.000164246"), Double("0.000162543"), Double("0.000160869"), Double("0.000159224"), Double("0.000157607"), Double("0.000156017"), Double("0.000154453"), Double("0.000152915"), Double("0.000151403"), Double("0.000149915"), Double("0.000148452"), Double("0.000147012"), Double("0.000145596"), Double("0.000144202"), Double("0.00014283"), Double("0.00014148"), Double("0.00014015"), Double("0.000138842"), Double("0.000137554"), Double("0.000136285"), Double("0.000135036"), Double("0.000133806"), Double("0.000132595"), Double("0.000131401"), Double("0.000130226"), Double("0.000129068"), Double("0.000127927"), Double("0.000126802"), Double("0.000125694"), Double("0.000124602"), Double("0.000123526"), Double("0.000122465"), Double("0.00012142"), Double("0.000120389"), Double("0.000119372"), Double("0.00011837"), Double("0.000117382"), Double("0.000116407"), Double("0.000115446"), Double("0.000114498"), Double("0.000113563"), Double("0.000112641"), Double("0.000111731"), Double("0.000110833"), Double("0.000109947"), Double("0.000109073"), Double("0.00010821"), Double("0.000107359"), Double("0.000106519"), Double("0.000105689"), Double("0.000104871"), Double("0.000104063"), Double("0.000103265"), Double("0.000102477"), Double("0.0001017"), Double("0.000100932"), Double("0.000100173"), Double("9.94247e-05"), Double("9.86852e-05"), Double("9.79548e-05"), Double("9.72333e-05"), Double("9.65207e-05"), Double("9.58168e-05"), Double("9.51213e-05"), Double("9.44343e-05"), Double("9.37554e-05"), Double("9.30847e-05"), Double("9.24219e-05"), Double("9.17669e-05"), Double("9.11197e-05"), Double("9.048e-05"), Double("8.98478e-05"), Double("8.92228e-05"), Double("8.86051e-05"), Double("8.79945e-05"), Double("8.73909e-05"), Double("8.67942e-05"), Double("8.62042e-05"), Double("8.56209e-05"), Double("8.50441e-05"), Double("8.44737e-05"), Double("8.39097e-05"), Double("8.3352e-05"), Double("8.28004e-05"), Double("8.22549e-05"), Double("8.17153e-05"), Double("8.11816e-05"), Double("8.06537e-05"), Double("8.01315e-05"), Double("7.96149e-05"), Double("7.91038e-05"), Double("7.85981e-05"), Double("7.80979e-05"), Double("7.76029e-05"), Double("7.71131e-05"), Double("7.66285e-05"), Double("7.61489e-05"), Double("7.56743e-05"), Double("7.52046e-05"), Double("7.47397e-05"), Double("7.42796e-05"), Double("7.38242e-05"), Double("7.33735e-05"), Double("7.29273e-05"), Double("7.24856e-05"), Double("7.20483e-05"), Double("7.16155e-05"), Double("7.11869e-05"), Double("7.07626e-05"), Double("7.03425e-05"), Double("6.99266e-05"), Double("6.95147e-05"), Double("6.91069e-05"), Double("6.8703e-05"), Double("6.8303e-05"), Double("6.7907e-05"), Double("6.75147e-05"), Double("6.71262e-05"), Double("6.67414e-05"), Double("6.63602e-05"), Double("6.59827e-05"), Double("6.56088e-05"), Double("6.52383e-05"), Double("6.48714e-05"), Double("6.45078e-05"), Double("6.41477e-05"), Double("6.37908e-05"), Double("6.34373e-05"), Double("6.30871e-05"), Double("6.274e-05"), Double("6.23961e-05"), Double("6.20554e-05"), Double("6.17177e-05"), Double("6.13831e-05"), Double("6.10515e-05"), Double("6.07229e-05"), Double("6.03972e-05"), Double("6.00744e-05"), Double("5.97545e-05"), Double("5.94374e-05"), Double("5.91231e-05"), Double("5.88115e-05"), Double("5.85027e-05"), Double("5.81966e-05"), Double("5.78931e-05"), Double("5.75923e-05"), Double("5.72941e-05"), Double("5.69984e-05"), Double("5.67053e-05"), Double("5.64146e-05"), Double("5.61265e-05"), Double("5.58408e-05"), Double("5.55575e-05"), Double("5.52766e-05"), Double("5.4998e-05"), Double("5.47218e-05"), Double("5.44479e-05"), Double("5.41763e-05"), Double("5.39069e-05"), Double("5.36397e-05"), Double("5.33748e-05"), Double("5.3112e-05"), Double("5.28513e-05"), Double("5.25928e-05"), Double("5.23364e-05"), Double("5.20821e-05"), Double("5.18298e-05"), Double("5.15795e-05"), Double("5.13313e-05"), Double("5.1085e-05"), Double("5.08407e-05"), Double("5.05984e-05"), Double("5.0358e-05"), Double("5.01194e-05"), Double("4.98828e-05"), Double("4.9648e-05"), Double("4.9415e-05"), Double("4.91838e-05"), Double("4.89545e-05"), Double("4.87269e-05"), Double("4.85011e-05"), Double("4.8277e-05"), Double("4.80546e-05"), Double("4.7834e-05"), Double("4.7615e-05"), Double("4.73977e-05"), Double("4.7182e-05"), Double("4.6968e-05"), Double("4.67556e-05"), Double("4.65448e-05"), Double("4.63355e-05"), Double("4.61278e-05"), Double("4.59217e-05"), Double("4.57171e-05"), Double("4.5514e-05"), Double("4.53124e-05"), Double("4.51123e-05"), Double("4.49137e-05"), Double("4.47165e-05"), Double("4.45208e-05"), Double("4.43265e-05"), Double("4.41335e-05"), Double("4.3942e-05"), Double("4.37519e-05"), Double("4.35631e-05"), Double("4.33757e-05"), Double("4.31896e-05"), Double("4.30049e-05"), Double("4.28215e-05"), Double("4.26393e-05"), Double("4.24585e-05"), Double("4.22789e-05"), Double("4.21006e-05"), Double("4.19235e-05"), Double("4.17477e-05"), Double("4.15731e-05"), Double("4.13998e-05"), Double("4.12276e-05"), Double("4.10566e-05"), Double("4.08868e-05"), Double("4.07181e-05"), Double("4.05506e-05"), Double("4.03843e-05"), Double("4.02191e-05"), Double("4.0055e-05"), Double("3.9892e-05"), Double("3.97302e-05"), Double("3.95694e-05"), Double("3.94097e-05"), Double("3.92511e-05"), Double("3.90935e-05"), Double("3.8937e-05"), Double("3.87815e-05"), Double("3.86271e-05"), Double("3.84737e-05"), Double("3.83213e-05"), Double("3.81698e-05"), Double("3.80194e-05"), Double("3.787e-05"), Double("3.77216e-05"), Double("3.75741e-05"), Double("3.74276e-05"), Double("3.7282e-05"), Double("3.71374e-05"), Double("3.69937e-05"), Double("3.68509e-05"), Double("3.67091e-05"), Double("3.65681e-05"), Double("3.64281e-05"), Double("3.62889e-05"), Double("3.61506e-05"), Double("3.60132e-05"), Double("3.58767e-05"), Double("3.5741e-05"), Double("3.56062e-05"), Double("3.54723e-05"), Double("3.53391e-05"), Double("3.52068e-05"), Double("3.50753e-05"), Double("3.49447e-05"), Double("3.48148e-05"), Double("3.46858e-05"), Double("3.45575e-05"), Double("3.44301e-05"), Double("3.43034e-05"), Double("3.41775e-05"), Double("3.40523e-05"), Double("3.39279e-05"), Double("3.38043e-05"), Double("3.36814e-05"), Double("3.35593e-05"), Double("3.34379e-05"), Double("3.33173e-05"), Double("3.31973e-05"), Double("3.30781e-05"), Double("3.29596e-05"), Double("3.28418e-05"), Double("3.27247e-05"), Double("3.26083e-05"), Double("3.24925e-05"), Double("3.23775e-05"), Double("3.22631e-05"), Double("3.21494e-05"), Double("3.20364e-05"), Double("3.1924e-05"), Double("3.18123e-05"), Double("3.17013e-05"), Double("3.15909e-05"), Double("3.14811e-05"), Double("3.13719e-05"), Double("3.12634e-05"), Double("3.11555e-05"), Double("3.10483e-05"), Double("3.09416e-05"), Double("3.08356e-05"), Double("3.07301e-05"), Double("3.06253e-05"), Double("3.0521e-05"), Double("3.04174e-05"), Double("3.03143e-05"), Double("3.02118e-05"), Double("3.01099e-05"), Double("3.00086e-05"), Double("2.99078e-05"), Double("2.98076e-05"), Double("2.97079e-05"), Double("2.96088e-05"), Double("2.95103e-05"), Double("2.94123e-05"), Double("2.93148e-05"), Double("2.92179e-05"), Double("2.91215e-05"), Double("2.90256e-05"), Double("2.89303e-05"), Double("2.88355e-05"), Double("2.87412e-05"), Double("2.86474e-05"), Double("2.85541e-05"), Double("2.84613e-05"), Double("2.83691e-05"), Double("2.82773e-05"), Double("2.8186e-05"), Double("2.80952e-05"), Double("2.80049e-05"), Double("2.79151e-05"), Double("2.78257e-05"), Double("2.77369e-05"), Double("2.76485e-05"), Double("2.75605e-05"), Double("2.74731e-05"), Double("2.73861e-05"), Double("2.72995e-05"), Double("2.72134e-05"), Double("2.71278e-05"), Double("2.70426e-05"), Double("2.69579e-05"), Double("2.68736e-05"), Double("2.67897e-05"), Double("2.67063e-05"), Double("2.66233e-05"), Double("2.65407e-05"), Double("2.64586e-05"), Double("2.63769e-05"), Double("2.62956e-05"), Double("2.62147e-05"), Double("2.61342e-05"), Double("2.60542e-05"), Double("2.59745e-05"), Double("2.58953e-05"), Double("2.58164e-05"), Double("2.5738e-05"), Double("2.56599e-05"), Double("2.55823e-05"), Double("2.5505e-05"), Double("2.54281e-05"), Double("2.53516e-05"), Double("2.52755e-05"), Double("2.51998e-05"), Double("2.51245e-05"), Double("2.50495e-05"), Double("2.49749e-05"), Double("2.49007e-05"), Double("2.48268e-05"), Double("2.47533e-05"), Double("2.46802e-05"), Double("2.46074e-05"), Double("2.4535e-05"), Double("2.44629e-05"), Double("2.43912e-05"), Double("2.43198e-05"), Double("2.42488e-05"), Double("2.41781e-05"), Double("2.41078e-05"), Double("2.40378e-05"), Double("2.39681e-05"), Double("2.38988e-05"), Double("2.38298e-05"), Double("2.37612e-05"), Double("2.36929e-05"), Double("2.36249e-05"), Double("2.35572e-05"), Double("2.34899e-05"), Double("2.34228e-05"), Double("2.33561e-05"), Double("2.32897e-05"), Double("2.32236e-05"), Double("2.31579e-05"), Double("2.30924e-05"), Double("2.30273e-05"), Double("2.29624e-05"), Double("2.28979e-05"), Double("2.28336e-05"), Double("2.27697e-05"), Double("2.27061e-05"), Double("2.26427e-05"), Double("2.25797e-05"), Double("2.25169e-05"), Double("2.24544e-05"), Double("2.23922e-05"), Double("2.23303e-05"), Double("2.22687e-05"), Double("2.22074e-05"), Double("2.21464e-05"), Double("2.20856e-05"), Double("2.20251e-05"), Double("2.19649e-05"), Double("2.1905e-05"), Double("2.18453e-05"), Double("2.17859e-05"), Double("2.17268e-05"), Double("2.16679e-05"), Double("2.16093e-05"), Double("2.1551e-05"), Double("2.14929e-05"), Double("2.14351e-05"), Double("2.13775e-05"), Double("2.13202e-05"), Double("2.12632e-05"), Double("2.12064e-05"), Double("2.11499e-05"), Double("2.10936e-05"), Double("2.10376e-05"), Double("2.09818e-05"), Double("2.09262e-05"), Double("2.08709e-05"), Double("2.08159e-05"), Double("2.07611e-05"), Double("2.07065e-05"), Double("2.06522e-05"), Double("2.05981e-05"), Double("2.05442e-05"), Double("2.04906e-05"), Double("2.04372e-05"), Double("2.0384e-05"), Double("2.03311e-05"), Double("2.02784e-05"), Double("2.02259e-05"), Double("2.01737e-05"), Double("2.01217e-05"), Double("2.00699e-05"), Double("2.00183e-05"), Double("1.99669e-05"), Double("1.99158e-05"), Double("1.98649e-05"), Double("1.98142e-05"), Double("1.97637e-05"), Double("1.97134e-05"), Double("1.96633e-05"), Double("1.96135e-05"), Double("1.95638e-05"), Double("1.95144e-05"), Double("1.94652e-05"), Double("1.94162e-05"), Double("1.93674e-05"), Double("1.93188e-05"), Double("1.92703e-05"), Double("1.92221e-05"), Double("1.91741e-05"), Double("1.91263e-05"), Double("1.90787e-05"), Double("1.90313e-05"), Double("1.89841e-05"), Double("1.89371e-05"), Double("1.88903e-05"), Double("1.88436e-05"), Double("1.87972e-05"), Double("1.8751e-05"), Double("1.87049e-05"), Double("1.8659e-05"), Double("1.86134e-05"), Double("1.85679e-05"), Double("1.85225e-05"), Double("1.84774e-05"), Double("1.84325e-05"), Double("1.83877e-05"), Double("1.83431e-05"), Double("1.82987e-05"), Double("1.82545e-05"), Double("1.82105e-05"), Double("1.81666e-05"), Double("1.81229e-05"), Double("1.80794e-05"), Double("1.8036e-05"), Double("1.79929e-05"), Double("1.79499e-05"), Double("1.7907e-05"), Double("1.78644e-05"), Double("1.78219e-05"), Double("1.77796e-05"), Double("1.77374e-05"), Double("1.76954e-05"), Double("1.76536e-05"), Double("1.76119e-05"), Double("1.75704e-05"), Double("1.75291e-05"), Double("1.74879e-05"), Double("1.74469e-05"), Double("1.74061e-05"), Double("1.73654e-05"), Double("1.73249e-05"), Double("1.72845e-05"), Double("1.72443e-05"), Double("1.72042e-05"), Double("1.71643e-05"), Double("1.71246e-05"), Double("1.7085e-05"), Double("1.70455e-05"), Double("1.70062e-05"), Double("1.69671e-05"), Double("1.69281e-05"), Double("1.68892e-05"), Double("1.68505e-05"), Double("1.6812e-05"), Double("1.67736e-05"), Double("1.67353e-05"), Double("1.66972e-05"), Double("1.66592e-05"), Double("1.66214e-05"), Double("1.65837e-05"), Double("1.65462e-05"), Double("1.65088e-05"), Double("1.64715e-05"), Double("1.64344e-05"), Double("1.63974e-05"), Double("1.63606e-05"), Double("1.63239e-05"), Double("1.62873e-05"), Double("1.62509e-05"), Double("1.62146e-05"), Double("1.61785e-05"), Double("1.61424e-05"), Double("1.61066e-05"), Double("1.60708e-05"), Double("1.60352e-05"), Double("1.59997e-05"), Double("1.59643e-05"), Double("1.59291e-05"), Double("1.5894e-05"), Double("1.5859e-05"), Double("1.58242e-05"), Double("1.57894e-05"), Double("1.57548e-05"), Double("1.57204e-05"), Double("1.5686e-05"), Double("1.56518e-05"), Double("1.56177e-05"), Double("1.55838e-05"), Double("1.55499e-05"), Double("1.55162e-05"), Double("1.54826e-05"), Double("1.54491e-05"), Double("1.54158e-05"), Double("1.53825e-05"), Double("1.53494e-05"), Double("1.53164e-05"), Double("1.52835e-05"), Double("1.52507e-05"), Double("1.52181e-05"), Double("1.51856e-05"), Double("1.51531e-05"), Double("1.51208e-05"), Double("1.50887e-05"), Double("1.50566e-05"), Double("1.50246e-05"), Double("1.49928e-05"), Double("1.4961e-05"), Double("1.49294e-05"), Double("1.48979e-05"), Double("1.48665e-05"), Double("1.48352e-05"), Double("1.4804e-05"), Double("1.4773e-05"), Double("1.4742e-05"), Double("1.47111e-05"), Double("1.46804e-05"), Double("1.46498e-05"), Double("1.46192e-05"), Double("1.45888e-05"), Double("1.45585e-05"), Double("1.45283e-05"), Double("1.44981e-05"), Double("1.44681e-05"), Double("1.44382e-05"), Double("1.44084e-05"), Double("1.43787e-05"), Double("1.43491e-05"), Double("1.43196e-05"), Double("1.42902e-05"), Double("1.42609e-05"), Double("1.42317e-05"), Double("1.42026e-05"), Double("1.41736e-05"), Double("1.41447e-05"), Double("1.41159e-05"), Double("1.40872e-05"), Double("1.40586e-05"), Double("1.40301e-05"), Double("1.40017e-05"), Double("1.39734e-05"), Double("1.39452e-05"), Double("1.3917e-05"), Double("1.3889e-05"), Double("1.38611e-05"), Double("1.38332e-05"), Double("1.38055e-05"), Double("1.37778e-05"), Double("1.37502e-05"), Double("1.37228e-05"), Double("1.36954e-05"), Double("1.36681e-05"), Double("1.36409e-05"), Double("1.36138e-05"), Double("1.35867e-05"), Double("1.35598e-05"), Double("1.3533e-05"), Double("1.35062e-05"), Double("1.34795e-05"), Double("1.3453e-05"), Double("1.34265e-05"), Double("1.34001e-05"), Double("1.33737e-05"), Double("1.33475e-05"), Double("1.33213e-05"), Double("1.32953e-05"), Double("1.32693e-05"), Double("1.32434e-05"), Double("1.32176e-05"), Double("1.31919e-05"), Double("1.31662e-05"), Double("1.31407e-05"), Double("1.31152e-05"), Double("1.30898e-05"), Double("1.30645e-05"), Double("1.30393e-05"), Double("1.30141e-05"), Double("1.2989e-05"), Double("1.2964e-05"), Double("1.29391e-05"), Double("1.29143e-05"), Double("1.28896e-05"), Double("1.28649e-05"), Double("1.28403e-05"), Double("1.28158e-05"), Double("1.27913e-05"), Double("1.2767e-05"), Double("1.27427e-05"), Double("1.27185e-05"), Double("1.26944e-05"), Double("1.26703e-05"), Double("1.26463e-05"), Double("1.26224e-05"), Double("1.25986e-05"), Double("1.25749e-05"), Double("1.25512e-05"), Double("1.25276e-05"), Double("1.2504e-05"), Double("1.24806e-05"), Double("1.24572e-05"), Double("1.24339e-05"), Double("1.24107e-05"), Double("1.23875e-05"), Double("1.23644e-05"), Double("1.23414e-05"), Double("1.23184e-05"), Double("1.22956e-05"), Double("1.22728e-05"), Double("1.225e-05"), Double("1.22274e-05"), Double("1.22048e-05"), Double("1.21822e-05"), Double("1.21598e-05"), Double("1.21374e-05"), Double("1.21151e-05"), Double("1.20928e-05"), Double("1.20706e-05"), Double("1.20485e-05"), Double("1.20265e-05"), Double("1.20045e-05"), Double("1.19826e-05"), Double("1.19607e-05"), Double("1.19389e-05"), Double("1.19172e-05"), Double("1.18956e-05"), Double("1.1874e-05"), Double("1.18525e-05"), Double("1.1831e-05"), Double("1.18096e-05"), Double("1.17883e-05"), Double("1.1767e-05"), Double("1.17458e-05"), Double("1.17247e-05"), Double("1.17036e-05"), Double("1.16826e-05"), Double("1.16617e-05"), Double("1.16408e-05"), Double("1.162e-05"), Double("1.15992e-05"), Double("1.15785e-05"), Double("1.15579e-05"), Double("1.15373e-05"), Double("1.15168e-05"), Double("1.14963e-05"), Double("1.1476e-05"), Double("1.14556e-05"), Double("1.14354e-05"), Double("1.14151e-05"), Double("1.1395e-05"), Double("1.13749e-05"), Double("1.13549e-05"), Double("1.13349e-05"), Double("1.1315e-05"), Double("1.12951e-05"), Double("1.12753e-05"), Double("1.12556e-05"), Double("1.12359e-05"), Double("1.12163e-05"), Double("1.11967e-05"), Double("1.11772e-05"), Double("1.11577e-05"), Double("1.11383e-05"), Double("1.1119e-05"), Double("1.10997e-05"), Double("1.10804e-05"), Double("1.10613e-05"), Double("1.10421e-05"), Double("1.10231e-05"), Double("1.10041e-05"), Double("1.09851e-05"), Double("1.09662e-05"), Double("1.09474e-05"), Double("1.09286e-05"), Double("1.09098e-05"), Double("1.08911e-05"), Double("1.08725e-05"), Double("1.08539e-05"), Double("1.08354e-05"), Double("1.08169e-05"), Double("1.07985e-05"), Double("1.07801e-05"), Double("1.07618e-05"), Double("1.07435e-05"), Double("1.07253e-05"), Double("1.07071e-05"), Double("1.0689e-05"), Double("1.0671e-05"), Double("1.0653e-05"), Double("1.0635e-05"), Double("1.06171e-05"), Double("1.05992e-05"), Double("1.05814e-05"), Double("1.05636e-05"), Double("1.05459e-05"), Double("1.05283e-05"), Double("1.05107e-05"), Double("1.04931e-05"), Double("1.04756e-05"), Double("1.04581e-05"), Double("1.04407e-05"), Double("1.04233e-05"), Double("1.0406e-05"), Double("1.03887e-05"), Double("1.03715e-05"), Double("1.03543e-05"), Double("1.03372e-05"), Double("1.03201e-05"), Double("1.03031e-05"), Double("1.02861e-05"), Double("1.02692e-05"), Double("1.02523e-05"), Double("1.02354e-05"), Double("1.02186e-05"), Double("1.02018e-05"), Double("1.01851e-05"), Double("1.01685e-05"), Double("1.01518e-05"), Double("1.01353e-05"), Double("1.01187e-05"), Double("1.01023e-05"), Double("1.00858e-05"), Double("1.00694e-05"), Double("1.00531e-05"), Double("1.00368e-05"), Double("1.00205e-05"), Double("1.00043e-05"), Double("9.9881e-06"), Double("9.97196e-06"), Double("9.95587e-06"), Double("9.93983e-06"), Double("9.92382e-06"), Double("9.90786e-06"), Double("9.89195e-06"), Double("9.87607e-06"), Double("9.86024e-06"), Double("9.84445e-06"), Double("9.8287e-06"), Double("9.81299e-06"), Double("9.79733e-06"), Double("9.78171e-06"), Double("9.76612e-06"), Double("9.75058e-06"), Double("9.73509e-06"), Double("9.71963e-06"), Double("9.70421e-06"), Double("9.68883e-06"), Double("9.6735e-06"), Double("9.6582e-06"), Double("9.64295e-06"), Double("9.62773e-06"), Double("9.61256e-06"), Double("9.59742e-06"), Double("9.58233e-06"), Double("9.56727e-06"), Double("9.55225e-06"), Double("9.53728e-06"), Double("9.52234e-06"), Double("9.50744e-06"), Double("9.49258e-06"), Double("9.47776e-06"), Double("9.46297e-06"), Double("9.44823e-06"), Double("9.43352e-06"), Double("9.41885e-06"), Double("9.40422e-06"), Double("9.38963e-06"), Double("9.37507e-06"), Double("9.36056e-06"), Double("9.34608e-06"), Double("9.33163e-06"), Double("9.31723e-06"), Double("9.30286e-06"), Double("9.28853e-06"), Double("9.27423e-06"), Double("9.25997e-06"), Double("9.24575e-06"), Double("9.23157e-06"), Double("9.21742e-06"), Double("9.20331e-06"), Double("9.18923e-06"), Double("9.17519e-06"), Double("9.16118e-06"), Double("9.14721e-06"), Double("9.13328e-06"), Double("9.11938e-06"), Double("9.10551e-06"), Double("9.09169e-06"), Double("9.07789e-06"), Double("9.06413e-06"), Double("9.05041e-06"), Double("9.03672e-06"), Double("9.02306e-06"), Double("9.00944e-06"), Double("8.99586e-06"), Double("8.9823e-06"), Double("8.96878e-06"), Double("8.9553e-06"), Double("8.94185e-06"), Double("8.92843e-06"),
+        vector<Double> kef = { Double("1.0000000000"), Double("0.1666666667"), Double("0.0750000000"), Double("0.0446428571"), Double("0.0303819444"), Double("0.0223721591"), Double("0.0173527644"), Double("0.0139648438"), Double("0.0115518009"), Double("0.0097616095"), Double("0.0083903358"), Double("0.0073125259"), Double("0.0064472103"), Double("0.0057400377"), Double("0.0051533097"), Double("0.0046601435"), Double("0.0042409071"), Double("0.0038809646"), Double("0.0035692054"), Double("0.0032970595"), Double("0.0030578216"), Double("0.0028461784"), Double("0.0026578706"), Double("0.0024894487"), Double("0.0023380919"), Double("0.0022014740"), Double("0.0020776610"), Double("0.0019650336"), Double("0.0018622264"), Double("0.0017680811"), Double("0.0016816094"), Double("0.0016019633"), Double("0.0015284116"), Double("0.0014603209"), Double("0.0013971399"), Double("0.0013383870"), Double("0.0012836394"), Double("0.0012325251"), Double("0.0011847153"), Double("0.0011399183"), Double("0.0010978750"), Double("0.0010583541"), Double("0.0010211487"), Double("0.0009860731"), Double("0.0009529606"), Double("0.0009216607"), Double("0.0008920374"), Double("0.0008639677"), Double("0.0008373398"), Double("0.0008120522"), Double("0.0007880123"), Double("0.0007651354"), Double("0.0007433445"), Double("0.0007225686"), Double("0.0007027428"), Double("0.0006838073"), Double("0.0006657071"), Double("0.0006483916"), Double("0.0006318140"), Double("0.0006159309"), Double("0.0006007023"), Double("0.0005860911"), Double("0.0005720627"), Double("0.0005585851"), Double("0.0005456286"), Double("0.0005331653"), Double("0.0005211694"), Double("0.0005096167"), Double("0.0004984846"), Double("0.0004877519"), Double("0.0004773989"), Double("0.0004674070"), Double("0.0004577589"), Double("0.0004484383"), Double("0.0004394296"), Double("0.0004307186"), Double("0.0004222917"), Double("0.0004141360"), Double("0.0004062395"), Double("0.0003985908"), Double("0.0003911791"), Double("0.0003839943"), Double("0.0003770267"), Double("0.0003702674"), Double("0.0003637077"), Double("0.0003573393"), Double("0.0003511547"), Double("0.0003451464"), Double("0.0003393076"), Double("0.0003336315"), Double("0.0003281120"), Double("0.0003227429"), Double("0.0003175187"), Double("0.0003124340"), Double("0.0003074835"), Double("0.0003026624"), Double("0.0002979660"), Double("0.0002933897"), Double("0.0002889295"), Double("0.0002845811"), Double("0.0002803407"), Double("0.0002762046"), Double("0.0002721691"), Double("0.0002682311"), Double("0.0002643870"), Double("0.0002606339"), Double("0.0002569688"), Double("0.0002533888"), Double("0.0002498911"), Double("0.0002464732"), Double("0.0002431325"), Double("0.0002398665"), Double("0.0002366731"), Double("0.0002335498"), Double("0.0002304947"), Double("0.0002275056"), Double("0.0002245806"), Double("0.0002217177"), Double("0.0002189151"), Double("0.0002161710"), Double("0.0002134838"), Double("0.0002108519"), Double("0.0002082735"), Double("0.0002057473"), Double("0.0002032718"), Double("0.0002008455"), Double("0.0001984671"), Double("0.0001961352"), Double("0.0001938487"), Double("0.0001916062"), Double("0.0001894067"), Double("0.0001872489"), Double("0.0001851318"), Double("0.0001830542"), Double("0.0001810153"), Double("0.0001790139"), Double("0.0001770491"), Double("0.0001751200"), Double("0.0001732257"), Double("0.0001713653"), Double("0.0001695380"), Double("0.0001677429"), Double("0.0001659792"), Double("0.0001642463"), Double("0.0001625433"), Double("0.0001608695"), Double("0.0001592242"), Double("0.0001576068"), Double("0.0001560167"), Double("0.0001544530"), Double("0.0001529153"), Double("0.0001514030"), Double("0.0001499154"), Double("0.0001484520"), Double("0.0001470123"), Double("0.0001455957"), Double("0.0001442017"), Double("0.0001428298"), Double("0.0001414796"), Double("0.0001401504"), Double("0.0001388420"), Double("0.0001375537"), Double("0.0001362853"), Double("0.0001350363"), Double("0.0001338062"), Double("0.0001325947"), Double("0.0001314013"), Double("0.0001302258"), Double("0.0001290676"), Double("0.0001279266"), Double("0.0001268022"), Double("0.0001256943"), Double("0.0001246023"), Double("0.0001235261"), Double("0.0001224653"), Double("0.0001214196"), Double("0.0001203887"), Double("0.0001193722"), Double("0.0001183701"), Double("0.0001173818"), Double("0.0001164072"), Double("0.0001154461"), Double("0.0001144981"), Double("0.0001135630"), Double("0.0001126405"), Double("0.0001117305"), Double("0.0001108327"), Double("0.0001099468"), Double("0.0001090727"), Double("0.0001082101"), Double("0.0001073588"), Double("0.0001065186"), Double("0.0001056893"), Double("0.0001048707"), Double("0.0001040626"), Double("0.0001032649"), Double("0.0001024773"), Double("0.0001016996"), Double("0.0001009317"), Double("0.0001001735"), Double("0.0000994247"), Double("0.0000986852"), Double("0.0000979548"), Double("0.0000972333"), Double("0.0000965207"), Double("0.0000958168"), Double("0.0000951213"), Double("0.0000944343"), Double("0.0000937554"), Double("0.0000930847"), Double("0.0000924219"), Double("0.0000917669"), Double("0.0000911197"), Double("0.0000904800"), Double("0.0000898478"), Double("0.0000892228"), Double("0.0000886051"), Double("0.0000879945"), Double("0.0000873909"), Double("0.0000867942"), Double("0.0000862042"), Double("0.0000856209"), Double("0.0000850441"), Double("0.0000844737"), Double("0.0000839097"), Double("0.0000833520"), Double("0.0000828004"), Double("0.0000822549"), Double("0.0000817153"), Double("0.0000811816"), Double("0.0000806537"), Double("0.0000801315"), Double("0.0000796149"), Double("0.0000791038"), Double("0.0000785981"), Double("0.0000780979"), Double("0.0000776029"), Double("0.0000771131"), Double("0.0000766285"), Double("0.0000761489"), Double("0.0000756743"), Double("0.0000752046"), Double("0.0000747397"), Double("0.0000742796"), Double("0.0000738242"), Double("0.0000733735"), Double("0.0000729273"), Double("0.0000724856"), Double("0.0000720483"), Double("0.0000716155"), Double("0.0000711869"), Double("0.0000707626"), Double("0.0000703425"), Double("0.0000699266"), Double("0.0000695147"), Double("0.0000691069"), Double("0.0000687030"), Double("0.0000683030"), Double("0.0000679070"), Double("0.0000675147"), Double("0.0000671262"), Double("0.0000667414"), Double("0.0000663602"), Double("0.0000659827"), Double("0.0000656088"), Double("0.0000652383"), Double("0.0000648714"), Double("0.0000645078"), Double("0.0000641477"), Double("0.0000637908"), Double("0.0000634373"), Double("0.0000630871"), Double("0.0000627400"), Double("0.0000623961"), Double("0.0000620554"), Double("0.0000617177"), Double("0.0000613831"), Double("0.0000610515"), Double("0.0000607229"), Double("0.0000603972"), Double("0.0000600744"), Double("0.0000597545"), Double("0.0000594374"), Double("0.0000591231"), Double("0.0000588115"), Double("0.0000585027"), Double("0.0000581966"), Double("0.0000578931"), Double("0.0000575923"), Double("0.0000572941"), Double("0.0000569984"), Double("0.0000567053"), Double("0.0000564146"), Double("0.0000561265"), Double("0.0000558408"), Double("0.0000555575"), Double("0.0000552766"), Double("0.0000549980"), Double("0.0000547218"), Double("0.0000544479"), Double("0.0000541763"), Double("0.0000539069"), Double("0.0000536397"), Double("0.0000533748"), Double("0.0000531120"), Double("0.0000528513"), Double("0.0000525928"), Double("0.0000523364"), Double("0.0000520821"), Double("0.0000518298"), Double("0.0000515795"), Double("0.0000513313"), Double("0.0000510850"), Double("0.0000508407"), Double("0.0000505984"), Double("0.0000503580"), Double("0.0000501194"), Double("0.0000498828"), Double("0.0000496480"), Double("0.0000494150"), Double("0.0000491838"), Double("0.0000489545"), Double("0.0000487269"), Double("0.0000485011"), Double("0.0000482770"), Double("0.0000480546"), Double("0.0000478340"), Double("0.0000476150"), Double("0.0000473977"), Double("0.0000471820"), Double("0.0000469680"), Double("0.0000467556"), Double("0.0000465448"), Double("0.0000463355"), Double("0.0000461278"), Double("0.0000459217"), Double("0.0000457171"), Double("0.0000455140"), Double("0.0000453124"), Double("0.0000451123"), Double("0.0000449137"), Double("0.0000447165"), Double("0.0000445208"), Double("0.0000443265"), Double("0.0000441335"), Double("0.0000439420"), Double("0.0000437519"), Double("0.0000435631"), Double("0.0000433757"), Double("0.0000431896"), Double("0.0000430049"), Double("0.0000428215"), Double("0.0000426393"), Double("0.0000424585"), Double("0.0000422789"), Double("0.0000421006"), Double("0.0000419235"), Double("0.0000417477"), Double("0.0000415731"), Double("0.0000413998"), Double("0.0000412276"), Double("0.0000410566"), Double("0.0000408868"), Double("0.0000407181"), Double("0.0000405506"), Double("0.0000403843"), Double("0.0000402191"), Double("0.0000400550"), Double("0.0000398920"), Double("0.0000397302"), Double("0.0000395694"), Double("0.0000394097"), Double("0.0000392511"), Double("0.0000390935"), Double("0.0000389370"), Double("0.0000387815"), Double("0.0000386271"), Double("0.0000384737"), Double("0.0000383213"), Double("0.0000381698"), Double("0.0000380194"), Double("0.0000378700"), Double("0.0000377216"), Double("0.0000375741"), Double("0.0000374276"), Double("0.0000372820"), Double("0.0000371374"), Double("0.0000369937"), Double("0.0000368509"), Double("0.0000367091"), Double("0.0000365681"), Double("0.0000364281"), Double("0.0000362889"), Double("0.0000361506"), Double("0.0000360132"), Double("0.0000358767"), Double("0.0000357410"), Double("0.0000356062"), Double("0.0000354723"), Double("0.0000353391"), Double("0.0000352068"), Double("0.0000350753"), Double("0.0000349447"), Double("0.0000348148"), Double("0.0000346858"), Double("0.0000345575"), Double("0.0000344301"), Double("0.0000343034"), Double("0.0000341775"), Double("0.0000340523"), Double("0.0000339279"), Double("0.0000338043"), Double("0.0000336814"), Double("0.0000335593"), Double("0.0000334379"), Double("0.0000333173"), Double("0.0000331973"), Double("0.0000330781"), Double("0.0000329596"), Double("0.0000328418"), Double("0.0000327247"), Double("0.0000326083"), Double("0.0000324925"), Double("0.0000323775"), Double("0.0000322631"), Double("0.0000321494"), Double("0.0000320364"), Double("0.0000319240"), Double("0.0000318123"), Double("0.0000317013"), Double("0.0000315909"), Double("0.0000314811"), Double("0.0000313719"), Double("0.0000312634"), Double("0.0000311555"), Double("0.0000310483"), Double("0.0000309416"), Double("0.0000308356"), Double("0.0000307301"), Double("0.0000306253"), Double("0.0000305210"), Double("0.0000304174"), Double("0.0000303143"), Double("0.0000302118"), Double("0.0000301099"), Double("0.0000300086"), Double("0.0000299078"), Double("0.0000298076"), Double("0.0000297079"), Double("0.0000296088"), Double("0.0000295103"), Double("0.0000294123"), Double("0.0000293148"), Double("0.0000292179"), Double("0.0000291215"), Double("0.0000290256"), Double("0.0000289303"), Double("0.0000288355"), Double("0.0000287412"), Double("0.0000286474"), Double("0.0000285541"), Double("0.0000284613"), Double("0.0000283691"), Double("0.0000282773"), Double("0.0000281860"), Double("0.0000280952"), Double("0.0000280049"), Double("0.0000279151"), Double("0.0000278257"), Double("0.0000277369"), Double("0.0000276485"), Double("0.0000275605"), Double("0.0000274731"), Double("0.0000273861"), Double("0.0000272995"), Double("0.0000272134"), Double("0.0000271278"), Double("0.0000270426"), Double("0.0000269579"), Double("0.0000268736"), Double("0.0000267897"), Double("0.0000267063"), Double("0.0000266233"), Double("0.0000265407"), Double("0.0000264586"), Double("0.0000263769"), Double("0.0000262956"), Double("0.0000262147"), Double("0.0000261342"), Double("0.0000260542"), Double("0.0000259745"), Double("0.0000258953"), Double("0.0000258164"), Double("0.0000257380"), Double("0.0000256599"), Double("0.0000255823"), Double("0.0000255050"), Double("0.0000254281"), Double("0.0000253516"), Double("0.0000252755"), Double("0.0000251998"), Double("0.0000251245"), Double("0.0000250495"), Double("0.0000249749"), Double("0.0000249007"), Double("0.0000248268"), Double("0.0000247533"), Double("0.0000246802"), Double("0.0000246074"), Double("0.0000245350"), Double("0.0000244629"), Double("0.0000243912"), Double("0.0000243198"), Double("0.0000242488"), Double("0.0000241781"), Double("0.0000241078"), Double("0.0000240378"), Double("0.0000239681"), Double("0.0000238988"), Double("0.0000238298"), Double("0.0000237612"), Double("0.0000236929"), Double("0.0000236249"), Double("0.0000235572"), Double("0.0000234899"), Double("0.0000234228"), Double("0.0000233561"), Double("0.0000232897"), Double("0.0000232236"), Double("0.0000231579"), Double("0.0000230924"), Double("0.0000230273"), Double("0.0000229624"), Double("0.0000228979"), Double("0.0000228336"), Double("0.0000227697"), Double("0.0000227061"), Double("0.0000226427"), Double("0.0000225797"), Double("0.0000225169"), Double("0.0000224544"), Double("0.0000223922"), Double("0.0000223303"), Double("0.0000222687"), Double("0.0000222074"), Double("0.0000221464"), Double("0.0000220856"), Double("0.0000220251"), Double("0.0000219649"), Double("0.0000219050"), Double("0.0000218453"), Double("0.0000217859"), Double("0.0000217268"), Double("0.0000216679"), Double("0.0000216093"), Double("0.0000215510"), Double("0.0000214929"), Double("0.0000214351"), Double("0.0000213775"), Double("0.0000213202"), Double("0.0000212632"), Double("0.0000212064"), Double("0.0000211499"), Double("0.0000210936"), Double("0.0000210376"), Double("0.0000209818"), Double("0.0000209262"), Double("0.0000208709"), Double("0.0000208159"), Double("0.0000207611"), Double("0.0000207065"), Double("0.0000206522"), Double("0.0000205981"), Double("0.0000205442"), Double("0.0000204906"), Double("0.0000204372"), Double("0.0000203840"), Double("0.0000203311"), Double("0.0000202784"), Double("0.0000202259"), Double("0.0000201737"), Double("0.0000201217"), Double("0.0000200699"), Double("0.0000200183"), Double("0.0000199669"), Double("0.0000199158"), Double("0.0000198649"), Double("0.0000198142"), Double("0.0000197637"), Double("0.0000197134"), Double("0.0000196633"), Double("0.0000196135"), Double("0.0000195638"), Double("0.0000195144"), Double("0.0000194652"), Double("0.0000194162"), Double("0.0000193674"), Double("0.0000193188"), Double("0.0000192703"), Double("0.0000192221"), Double("0.0000191741"), Double("0.0000191263"), Double("0.0000190787"), Double("0.0000190313"), Double("0.0000189841"), Double("0.0000189371"), Double("0.0000188903"), Double("0.0000188436"), Double("0.0000187972"), Double("0.0000187510"), Double("0.0000187049"), Double("0.0000186590"), Double("0.0000186134"), Double("0.0000185679"), Double("0.0000185225"), Double("0.0000184774"), Double("0.0000184325"), Double("0.0000183877"), Double("0.0000183431"), Double("0.0000182987"), Double("0.0000182545"), Double("0.0000182105"), Double("0.0000181666"), Double("0.0000181229"), Double("0.0000180794"), Double("0.0000180360"), Double("0.0000179929"), Double("0.0000179499"), Double("0.0000179070"), Double("0.0000178644"), Double("0.0000178219"), Double("0.0000177796"), Double("0.0000177374"), Double("0.0000176954"), Double("0.0000176536"), Double("0.0000176119"), Double("0.0000175704"), Double("0.0000175291"), Double("0.0000174879"), Double("0.0000174469"), Double("0.0000174061"), Double("0.0000173654"), Double("0.0000173249"), Double("0.0000172845"), Double("0.0000172443"), Double("0.0000172042"), Double("0.0000171643"), Double("0.0000171246"), Double("0.0000170850"), Double("0.0000170455"), Double("0.0000170062"), Double("0.0000169671"), Double("0.0000169281"), Double("0.0000168892"), Double("0.0000168505"), Double("0.0000168120"), Double("0.0000167736"), Double("0.0000167353"), Double("0.0000166972"), Double("0.0000166592"), Double("0.0000166214"), Double("0.0000165837"), Double("0.0000165462"), Double("0.0000165088"), Double("0.0000164715"), Double("0.0000164344"), Double("0.0000163974"), Double("0.0000163606"), Double("0.0000163239"), Double("0.0000162873"), Double("0.0000162509"), Double("0.0000162146"), Double("0.0000161785"), Double("0.0000161424"), Double("0.0000161066"), Double("0.0000160708"), Double("0.0000160352"), Double("0.0000159997"), Double("0.0000159643"), Double("0.0000159291"), Double("0.0000158940"), Double("0.0000158590"), Double("0.0000158242"), Double("0.0000157894"), Double("0.0000157548"), Double("0.0000157204"), Double("0.0000156860"), Double("0.0000156518"), Double("0.0000156177"), Double("0.0000155838"), Double("0.0000155499"), Double("0.0000155162"), Double("0.0000154826"), Double("0.0000154491"), Double("0.0000154158"), Double("0.0000153825"), Double("0.0000153494"), Double("0.0000153164"), Double("0.0000152835"), Double("0.0000152507"), Double("0.0000152181"), Double("0.0000151856"), Double("0.0000151531"), Double("0.0000151208"), Double("0.0000150887"), Double("0.0000150566"), Double("0.0000150246"), Double("0.0000149928"), Double("0.0000149610"), Double("0.0000149294"), Double("0.0000148979"), Double("0.0000148665"), Double("0.0000148352"), Double("0.0000148040"), Double("0.0000147730"), Double("0.0000147420"), Double("0.0000147111"), Double("0.0000146804"), Double("0.0000146498"), Double("0.0000146192"), Double("0.0000145888"), Double("0.0000145585"), Double("0.0000145283"), Double("0.0000144981"), Double("0.0000144681"), Double("0.0000144382"), Double("0.0000144084"), Double("0.0000143787"), Double("0.0000143491"), Double("0.0000143196"), Double("0.0000142902"), Double("0.0000142609"), Double("0.0000142317"), Double("0.0000142026"), Double("0.0000141736"), Double("0.0000141447"), Double("0.0000141159"), Double("0.0000140872"), Double("0.0000140586"), Double("0.0000140301"), Double("0.0000140017"), Double("0.0000139734"), Double("0.0000139452"), Double("0.0000139170"), Double("0.0000138890"), Double("0.0000138611"), Double("0.0000138332"), Double("0.0000138055"), Double("0.0000137778"), Double("0.0000137502"), Double("0.0000137228"), Double("0.0000136954"), Double("0.0000136681"), Double("0.0000136409"), Double("0.0000136138"), Double("0.0000135867"), Double("0.0000135598"), Double("0.0000135330"), Double("0.0000135062"), Double("0.0000134795"), Double("0.0000134530"), Double("0.0000134265"), Double("0.0000134001"), Double("0.0000133737"), Double("0.0000133475"), Double("0.0000133213"), Double("0.0000132953"), Double("0.0000132693"), Double("0.0000132434"), Double("0.0000132176"), Double("0.0000131919"), Double("0.0000131662"), Double("0.0000131407"), Double("0.0000131152"), Double("0.0000130898"), Double("0.0000130645"), Double("0.0000130393"), Double("0.0000130141"), Double("0.0000129890"), Double("0.0000129640"), Double("0.0000129391"), Double("0.0000129143"), Double("0.0000128896"), Double("0.0000128649"), Double("0.0000128403"), Double("0.0000128158"), Double("0.0000127913"), Double("0.0000127670"), Double("0.0000127427"), Double("0.0000127185"), Double("0.0000126944"), Double("0.0000126703"), Double("0.0000126463"), Double("0.0000126224"), Double("0.0000125986"), Double("0.0000125749"), Double("0.0000125512"), Double("0.0000125276"), Double("0.0000125040"), Double("0.0000124806"), Double("0.0000124572"), Double("0.0000124339"), Double("0.0000124107"), Double("0.0000123875"), Double("0.0000123644"), Double("0.0000123414"), Double("0.0000123184"), Double("0.0000122956"), Double("0.0000122728"), Double("0.0000122500"), Double("0.0000122274"), Double("0.0000122048"), Double("0.0000121822"), Double("0.0000121598"), Double("0.0000121374"), Double("0.0000121151"), Double("0.0000120928"), Double("0.0000120706"), Double("0.0000120485"), Double("0.0000120265"), Double("0.0000120045"), Double("0.0000119826"), Double("0.0000119607"), Double("0.0000119389"), Double("0.0000119172"), Double("0.0000118956"), Double("0.0000118740"), Double("0.0000118525"), Double("0.0000118310"), Double("0.0000118096"), Double("0.0000117883"), Double("0.0000117670"), Double("0.0000117458"), Double("0.0000117247"), Double("0.0000117036"), Double("0.0000116826"), Double("0.0000116617"), Double("0.0000116408"), Double("0.0000116200"), Double("0.0000115992"), Double("0.0000115785"), Double("0.0000115579"), Double("0.0000115373"), Double("0.0000115168"), Double("0.0000114963"), Double("0.0000114760"), Double("0.0000114556"), Double("0.0000114354"), Double("0.0000114151"), Double("0.0000113950"), Double("0.0000113749"), Double("0.0000113549"), Double("0.0000113349"), Double("0.0000113150"), Double("0.0000112951"), Double("0.0000112753"), Double("0.0000112556"), Double("0.0000112359"), Double("0.0000112163"), Double("0.0000111967"), Double("0.0000111772"), Double("0.0000111577"), Double("0.0000111383"), Double("0.0000111190"), Double("0.0000110997"), Double("0.0000110804"), Double("0.0000110613"), Double("0.0000110421"), Double("0.0000110231"), Double("0.0000110041"), Double("0.0000109851"), Double("0.0000109662"), Double("0.0000109474"), Double("0.0000109286"), Double("0.0000109098"), Double("0.0000108911"), Double("0.0000108725"), Double("0.0000108539"), Double("0.0000108354"), Double("0.0000108169"), Double("0.0000107985"), Double("0.0000107801"), Double("0.0000107618"), Double("0.0000107435"), Double("0.0000107253"), Double("0.0000107071"), Double("0.0000106890"), Double("0.0000106710"), Double("0.0000106530"), Double("0.0000106350"), Double("0.0000106171"), Double("0.0000105992"), Double("0.0000105814"), Double("0.0000105636"), Double("0.0000105459"), Double("0.0000105283"), Double("0.0000105107"), Double("0.0000104931"), Double("0.0000104756"), Double("0.0000104581"), Double("0.0000104407"), Double("0.0000104233"), Double("0.0000104060"), Double("0.0000103887"), Double("0.0000103715"), Double("0.0000103543"), Double("0.0000103372"), Double("0.0000103201"), Double("0.0000103031"), Double("0.0000102861"), Double("0.0000102692"), Double("0.0000102523"), Double("0.0000102354"), Double("0.0000102186"), Double("0.0000102018"), Double("0.0000101851"), Double("0.0000101685"), Double("0.0000101518"), Double("0.0000101353"), Double("0.0000101187"), Double("0.0000101023"), Double("0.0000100858"), Double("0.0000100694"), Double("0.0000100531"), Double("0.0000100368"), Double("0.0000100205"), Double("0.0000100043"), Double("0.0000099881"), Double("0.0000099720"), Double("0.0000099559"), Double("0.0000099398"), Double("0.0000099238"), Double("0.0000099079"), Double("0.0000098919"), Double("0.0000098761"), Double("0.0000098602"), Double("0.0000098444"), Double("0.0000098287"), Double("0.0000098130"), Double("0.0000097973"), Double("0.0000097817"), Double("0.0000097661"), Double("0.0000097506"), Double("0.0000097351"), Double("0.0000097196"), Double("0.0000097042"), Double("0.0000096888"), Double("0.0000096735"), Double("0.0000096582"), Double("0.0000096429"), Double("0.0000096277"), Double("0.0000096126"), Double("0.0000095974"), Double("0.0000095823"), Double("0.0000095673"), Double("0.0000095523"), Double("0.0000095373"), Double("0.0000095223"), Double("0.0000095074"), Double("0.0000094926"), Double("0.0000094778"), Double("0.0000094630"), Double("0.0000094482"), Double("0.0000094335"), Double("0.0000094189"), Double("0.0000094042"), Double("0.0000093896"), Double("0.0000093751"), Double("0.0000093606"), Double("0.0000093461"), Double("0.0000093316"), Double("0.0000093172"), Double("0.0000093029"), Double("0.0000092885"), Double("0.0000092742"), Double("0.0000092600"), Double("0.0000092458"), Double("0.0000092316"), Double("0.0000092174"), Double("0.0000092033"), Double("0.0000091892"), Double("0.0000091752"), Double("0.0000091612"), Double("0.0000091472"), Double("0.0000091333"), Double("0.0000091194"), Double("0.0000091055"), Double("0.0000090917"), Double("0.0000090779"), Double("0.0000090641"), Double("0.0000090504"), Double("0.0000090367"), Double("0.0000090231"), Double("0.0000090094"), Double("0.0000089959"), Double("0.0000089823"), Double("0.0000089688"), Double("0.0000089553"), Double("0.0000089418"), Double("0.0000089284"),
         };
-        lint kef_kol = 10;
+        lint kef_kol = 1000;
         Double a = *this,ans("0");
         for (lint i = 1; i < kef_kol;a=a*(*this), ++i) {
             ans += (kef[i] * a);
         }
         ans += kef[0];
+        return ans;
+    }
+    Double pi() {
+        Double ans("0"),a16("16"),a16_dop("1"),a8("8"), a1("1"), a2("2"), a4("4"), a5("5"), a6("6");
+        lint limit = 100;
+        Double k("0");
+        Double dop8k, dop8k1, dop8k4, dop8k5, dop8k6;
+        Double dop48k1, dop28k4, dop18k5, dop18k6;
+        Double a1_a16_dop,dif;
+        for (lint i = 0; i < limit; ++i,k+=a1, a16_dop= a16_dop*a16) {
+            dop8k = a8 * k;
+            dop8k1 = (dop8k + a1);
+            dop8k4 = (dop8k + a4);
+            dop8k5 = (dop8k + a5);
+            dop8k6 = (dop8k + a6);
+            dop48k1 = a4 / dop8k1;
+            dop28k4 = a2 / dop8k4;
+            dop18k5 = a1 / dop8k5;
+            dop18k6 = a1 / dop8k6;
+            a1_a16_dop = a1 / a16_dop;
+            dif = dop48k1 - dop28k4 - dop18k5 - dop18k6;
+            ans += (a1_a16_dop) * dif;
+        }
+        
         return ans;
     }
 };
@@ -567,9 +744,9 @@ int main()
     ////convert(b, c);
     //sum(a, b);
     //lcout(a);
-    Double a("1");
-    Double b;
-    b=a.asin();
-    cout << b.convert_to_string();
+    Double a("1.2");
+    Double b("0.2");
+    a=a/b;
+    cout << a.convert_to_string();
     return 0;
 }
