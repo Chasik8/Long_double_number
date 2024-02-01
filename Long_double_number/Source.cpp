@@ -13,7 +13,7 @@ typedef long long int lint;
 typedef unsigned long long int ulint;
 #define inf 1000000000
 #define loginf 9
-#define accuracy 100
+#define accuracy 300
 class Double {
 private:
     vector<lint> v;
@@ -21,9 +21,10 @@ private:
 public:
     Double(string s = "") {
         n = 0;
-        if (s != "") {
-            convert(s);
+        if (s == "") {
+            s = "0";
         }
+        convert(s);
     }
     void convert(string a) {
         lint k = 0;
@@ -91,9 +92,14 @@ public:
         }
         else {
             lint sdvik = (n-accuracy) / loginf;
-            for (lint i = v.size() - 1; i > sdvik; --i) {
-                v[i - sdvik]=v[i];
+            for (lint i = v.size() - 1; i > v.size()- sdvik; --i) {
+                if (i - sdvik>=0) {
+                    v[i - sdvik] = v[i];
+                }
                 v[i]=0;
+            }
+            for (lint i = v.size() - sdvik; i < v.size(); ++i) {
+                v[i] = 0;
             }
             n -= sdvik * loginf;
             for (lint i = 0;i< n - accuracy; ++i) {
@@ -103,8 +109,8 @@ public:
             v.resize(v.size() - sdvik);
         }
     }
-    bool sng() {
-        for (lint i = 0; i < v.size(); ++i) {
+    bool sign() {
+        for (lint i = v.size()-1; i >=0; --i) {
             if (v[i] != 0) {
                 if (v[i] > 0) {
                     return true;
@@ -120,7 +126,7 @@ public:
         string s;
         Double nul("0");
         bool minus = false;
-        if (!sng()) {
+        if (!sign()) {
             minus = true;
             *this *= -1;
         }
@@ -202,6 +208,12 @@ public:
             }
         }
     }
+    void clear() {
+        while ((v.size())*loginf>accuracy&&v[v.size()-1]==0)
+        {
+            v.pop_back();
+        }
+    }
     bool operator += (const Double& b) {
         try
         {
@@ -210,53 +222,47 @@ public:
                     v.push_back(0);
                 }
             }
-            v[0] += b.v[0];
-            for (lint i = 1; i < v.size(); ++i) {
-                if (i < b.v.size()) {
-                    v[i] += b.v[i];
+            if (b.v.size() > 0) {
+                v[0] += b.v[0];
+                for (lint i = 1; i < v.size(); ++i) {
+                    if (i < b.v.size()) {
+                        v[i] += b.v[i];
+                    }
+                    v[i] += v[i - 1] / inf;
+                    v[i - 1] %= inf;
                 }
-                v[i] += v[i - 1] / inf;
-                v[i - 1] %= inf;
-            }
-            if (v[v.size() - 1] / inf >= 1) {
-                v.push_back(v[v.size() - 1] / inf);
-                v[v.size() - 2] %= inf;
-            }
-            //bool l = true;
-            //for (lint i = lint(v.size() - 1); l && i > 0; --i) {
-            //    if (v[i] == 0) {
-            //        v.pop_back();
-            //    }
-            //    else {
-            //        l = false;
-            //    }
-            //}
-            //Double nul("0");
-            if (v.size() >= 2) {
-                //if (*this < nul) {
-                if (v[v.size()-1]<0){
-                    for (lint i = 0; i < v.size()-1; ++i) {
-                        if (v[i] > 0) {
-                            v[i] -= inf;
-                            ++v[i + 1];
+                if (v[v.size() - 1] / inf >= 1) {
+                    v.push_back(v[v.size() - 1] / inf);
+                    v[v.size() - 2] %= inf;
+                }
+                if (v.size() >= 2) {
+                    if (!sign()) {
+                        for (lint i = 0; i < v.size() - 1; ++i) {
+                            if (v[i] > 0) {
+                                v[i] -= inf;
+                                ++v[i + 1];
+                            }
                         }
                     }
-                }
-                else {
-                    for (lint i = v.size() - 2; i >= 0; --i) {
+                    else {
+                        for (lint i = v.size() - 2; i >= 0; --i) {
                             v[i] += inf;
                             --v[i + 1];
-                    }
-                    for (lint i = 0; i < v.size()-1; ++i) {
-                        if (v[i] >= inf) {
-                            v[i] -= inf;
-                            ++v[i + 1];
+                        }
+                        for (lint i = 0; i < v.size() - 1; ++i) {
+                            if (v[i] >= inf) {
+                                v[i] -= inf;
+                                ++v[i + 1];
+                            }
                         }
                     }
                 }
+                clear();
+
+                return true;
             }
-            return true;
         }
+
         catch (...)
         {
             std::cout << "Error_operation+=" << std::endl;
@@ -264,80 +270,39 @@ public:
         }
     }
     bool operator < (const Double& b) {
-        if (v.size() < b.v.size()) {
-            return  true;
-        }
-        else if (v.size() > b.v.size()) {
+        Double c = *this;
+        c -= b;
+        if (c.sign())
             return  false;
-        }
-        else {
-            for (lint i = v.size() - 1; i >= 0; --i) {
-                if (v[i] < b.v[i]) {
-                    return  true;
-                }
-                else if (v[i] > b.v[i]) {
-                    return  false;
-                }
-            }
-        }
-        return  false;
-    }
-    bool operator <= (const Double& b) {
-        if (v.size() < b.v.size()) {
-            return  true;
-        }
-        else if (v.size() > b.v.size()) {
-            return  false;
-        }
-        else {
-            for (lint i = v.size() - 1; i >= 0; --i) {
-                if (v[i] < b.v[i]) {
-                    return  true;
-                }
-                else if (v[i] > b.v[i]) {
-                    return  false;
-                }
-            }
-        }
         return  true;
     }
-    bool operator > (const Double& b) {
-        if (v.size() > b.v.size()) {
+    bool operator <= (const Double& b) {
+        Double c = *this;
+        c -= b;
+        if (c == Double("0")) {
             return  true;
         }
-        else if (v.size() < b.v.size()) {
+        if (!c.sign())
+            return  true;
+        return  false;
+    }
+    bool operator > (const Double& b) {
+        Double c = *this;
+        c -= b;
+        if (c == Double("0")) {
             return  false;
         }
-        else {
-            for (lint i = v.size() - 1; i >= 0; --i) {
-                if (v[i] > b.v[i]) {
-                    return  true;
-                }
-                else if (v[i] < b.v[i]) {
-                    return  false;
-                }
-            }
-        }
+        if (c.sign())
+            return  true;
         return  false;
     }
     bool operator >= (const Double& b) {
-        if (v.size() > b.v.size()) {
+        Double c = *this;
+        c -= b;
+        if(c.sign())
             return  true;
-        }
-        else if (v.size() < b.v.size()) {
-            return  false;
-        }
-        else {
-            for (lint i = v.size() - 1; i >= 0; --i) {
-                if (v[i] > b.v[i]) {
-                    return  true;
-                }
-                else if (v[i] < b.v[i]) {
-                    return  false;
-                }
-            }
-        }
-        return  true;
+        return  false;
+
     }
     bool operator != (const Double& b) {
         if (v.size() > b.v.size()) {
@@ -355,20 +320,21 @@ public:
         }
         return  false;
     }
+    bool operator == (const Double& b) {
+        return !(*this != b);
+    }
     void lswap (Double& a,Double& b) {
         swap(a.v,b.v);
         swap(a.n, b.n);
     }
-    bool operator -= (Double& b) {
+    bool operator -= (const Double& b) {
         try
         {
+            Double c = b;
             for (lint i = 0; i < lint(b.v.size()); ++i) {
-                b.v[i] *= -1;
+                c.v[i] *= -1;
             }
-            *this += b;
-            for (lint i = 0; i < lint(b.v.size()); ++i) {
-                b.v[i] *= -1;
-            }
+            *this += c;
             return true;
         }
         catch (...)
@@ -426,25 +392,46 @@ public:
         return v.size();
     }
     // количество разр€ов не больше чем 10^9
-    Double operator * (Double&b) {
+    Double operator * (const Double&bb) {
         try
         {
-            Double c("0");
-            Double otw("0");
-            if ((v.size() == 1 && v[0] == 0) || (b.size() == 1 && v[0] == 0)) {
-                otw = c;
+            Double b = bb;
+            //cout << convert_to_string() << " " << b.convert_to_string() << endl << endl;
+            if (*this == Double("0") || b == Double("0")) {
+                Double otw("0");
+                return otw;
             }
             else {
-                for (lint i = 0; i < b.size(); ++i) {
-                    c.copy(*this);
-                    c *= b[i];
-                    c << i;
-                    otw += c;
+                bool minus = false;
+                if (!sign()) {
+                    minus = !minus;
+                    *this *= -1;
                 }
+                if (!(b.sign())) {
+                    minus = !minus;
+                    b *= -1;
+                }
+                Double c("0");
+                Double otw("0");
+                if ((v.size() == 1 && v[0] == 0) || (b.size() == 1 && v[0] == 0)) {
+                    otw = c;
+                }
+                else {
+                    for (lint i = 0; i < b.size(); ++i) {
+                        c.copy(*this);
+                        c *= b[i];
+                        c << i;
+                        otw += c;
+                    }
+                }
+                otw.n = this->n + b.n;
+                otw.formatting();
+                if (minus) {
+                    otw *= -1;
+                }
+                otw.clear();
+                return otw;
             }
-            otw.n = this->n + b.n;
-            otw.formatting();
-            return otw;
         }
         catch (...)
         {
@@ -549,7 +536,7 @@ public:
     }
     Double max_element_abs() {
         string str_c = "";
-        for (lint i = 0; i < 4; ++i) {
+        for (lint i = 0; i < 10; ++i) {
             str_c += "0";
         }
         str_c += "1";
@@ -557,11 +544,23 @@ public:
         Double c(str_c);
         return c;
     }
-    Double operator / (Double& b) {
-        
+    Double operator / (const Double& bb) {
+        Double b = bb;
+        if (b == Double("0")) {
+            return Double("0");
+        }
+        bool minus = false;
+        if (!sign()) {
+            minus = !minus;
+            *this *= -1;
+        }
+        if (!(b.sign())) {
+            minus = !minus;
+            b *= -1;
+        }
         Double otw,nul("0");
         if (*this != nul) {
-            Double l("-1"), r, mid,dopl("0"), dopr("0");
+            Double l("0"), r, mid,dopl("0"), dopr("0");
             Double c = min_element_abs();
             r = max_element_abs();
             while ((r-l)>c) {
@@ -585,7 +584,11 @@ public:
                 otw = r;
             }
         }
+        if (minus) {
+            otw *= -1;
+        }
         otw.n = this->n;
+        otw.clear();
         return otw;
     }
     Double asin() {
@@ -601,13 +604,12 @@ public:
     }
     Double pi() {
         Double ans("0"),a16("16"),a16_dop("1"),a8("8"), a1("1"), a2("2"), a4("4"), a5("5"), a6("6");
-        lint limit = 100;
+        lint limit = 200;
         Double k("0");
         Double dop8k, dop8k1, dop8k4, dop8k5, dop8k6;
         Double dop48k1, dop28k4, dop18k5, dop18k6;
-        Double a1_a16_dop,dif;
-        for (lint i = 0; i < limit; ++i,k+=a1, a16_dop= a16_dop*a16) {
-            dop8k = a8 * k;
+        Double a1_a16_dop,dif,dop;
+        for (lint i = 0; i < limit; ++i,k+=a1, dop8k += a8, a16_dop= a16_dop*a16) {
             dop8k1 = (dop8k + a1);
             dop8k4 = (dop8k + a4);
             dop8k5 = (dop8k + a5);
@@ -618,7 +620,8 @@ public:
             dop18k6 = a1 / dop8k6;
             a1_a16_dop = a1 / a16_dop;
             dif = dop48k1 - dop28k4 - dop18k5 - dop18k6;
-            ans += (a1_a16_dop) * dif;
+            dop = (a1_a16_dop)*dif;
+            ans += dop;
         }
         
         return ans;
@@ -744,9 +747,13 @@ int main()
     ////convert(b, c);
     //sum(a, b);
     //lcout(a);
-    Double a("1.2");
-    Double b("0.2");
-    a=a/b;
-    cout << a.convert_to_string();
+/*    Double a("0.9999999999999999999986565319975147930584243283224789042324999866093474805292875999938570001099999998");
+    Double b("3.1333333333333333333361864116239566918896061940999991840338277726220805610927990143372920881605000009");
+    */
+    lint tim = clock();
+    Double a("1");
+    Double b("16");
+    a=a.pi();
+    cout << a.convert_to_string()<<endl<<clock()-tim;
     return 0;
 }
