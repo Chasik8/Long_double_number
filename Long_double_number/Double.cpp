@@ -15,7 +15,7 @@ typedef long long int lint;
 typedef unsigned long long int ulint;
 #define inf 1000000000
 #define loginf 9
-#define accuracy 1000
+#define accuracy 100
 class Double {
 private:
     vector<lint> v;
@@ -465,15 +465,13 @@ public:
             return c;
         }
     }
-    void lpow(lint b) {
-        Double c1;
-        Double ñ2;
-        c1.copy(*this);
-        ñ2.copy(*this);
+    Double lpow(lint b) {
+        Double c1=*this;
+        Double c2 = *this;
         for (lint i = 0; i < b; ++i) {
-            c1 = (ñ2 * c1);
+            c1 =c1*c2;
         }
-        this->copy(c1);
+        return c1;
     }
     lint operator [] (lint i) {
         try
@@ -543,9 +541,11 @@ public:
             return Double("1");
         }else if (a > bb) {
             sdvik = (lint)to_string(bb.v[bb.v.size() - 1]).size()-(lint)to_string(a.v[a.v.size() - 1]).size();
+            sdvik += (bb.v[bb.v.size() - 1]*10 > a.v[a.v.size() - 1]&&sdvik!=0? 1 : 0);
             for (lint i = 0; i < abs(sdvik); ++i) {
                 b *= 10;
             }
+
             lint sdv = a.size()-bb.v.size();
             if (sdv>0) {
                 b << (sdv);
@@ -554,24 +554,17 @@ public:
         }
         else{
             sdvik = (lint)to_string(bb.v[bb.v.size() - 1]).size()- (lint)to_string(a.v[a.v.size() - 1]).size();
-            //bool flag=true;
             for (lint i = 0; i < abs(sdvik); ++i) {
                 a *= 10;
-                //flag = false;
             }
             if (a.size()-bb.v.size() > 0) {
-                //flag = false;
                 lint dop2 = abs((lint)a.size() - (lint)bb.v.size());
                 a << dop2;
                 sdvik += dop2 * loginf;
             }
-            //if (flag) {
-            //    a *= 10;
-            //    sdvik = 1;
-            //}
         }
         Double ans("0");
-        for (lint k = 0; k < accuracy; ++k) {
+        for (lint k = 0; k < 1000; ++k) {
             lint i = 0;
             for  (;a>=b;++i)
             {
@@ -584,11 +577,12 @@ public:
             a *= 10;
         }
         ans.n += (ans.v.size() - 1) * loginf + to_string(ans.v[ans.v.size() - 1]).size() - accuracy;
-        ans.formatting();
+        ans >> (lint)((ans.n - accuracy) / loginf);
+        ans.n = accuracy;
         lint dop1 = sdvik / loginf;
             if (sdvik > 0) {
                 ans >> abs(dop1);
-                for (lint i = 0; i < abs(sdvik) - abs(dop1) * loginf-1; ++i) {
+                for (lint i = 0; i < abs(sdvik) - abs(dop1) * loginf; ++i) {
                     ans /= 10;
                 }
             }
@@ -598,9 +592,6 @@ public:
                     ans *= 10;
                 }
             }
-            if (*this > bb) {
-                ans *= 10;
-        }
         return ans;
     }
     //Double operator / (const Double& bb) {
@@ -688,29 +679,39 @@ Double("1.0000000000000000000000000000000000000000000000000000000000000000000000
         }
         return ans;
     }
-    Double pi() {
+    Double pi_16() {
         Double ans("0"),a16("16"),a16_dop("1"),a8("8"), a1("1"), a2("2"), a4("4"), a5("5"), a6("6");
-        lint limit = 50;
+        lint limit = 30;
         Double k("0");
-        Double dop8k, dop8k1, dop8k4, dop8k5, dop8k6;
-        Double dop48k1, dop28k4, dop18k5, dop18k6;
+        Double dop8k;
         Double a1_a16_dop,dif,dop;
         for (lint i = 0; i < limit; ++i,k+=a1, dop8k += a8, a16_dop= a16_dop*a16) {
-            dop8k1 = (dop8k + a1);
-            dop8k4 = (dop8k + a4);
-            dop8k5 = (dop8k + a5);
-            dop8k6 = (dop8k + a6);
-            dop48k1 = a4 / dop8k1;
-            dop28k4 = a2 / dop8k4;
-            dop18k5 = a1 / dop8k5;
-            dop18k6 = a1 / dop8k6;
+            dif = a4 / (dop8k + a1) - a2 / (dop8k + a4) - a1 / (dop8k + a5) - a1 / (dop8k + a6);
             a1_a16_dop = a1 / a16_dop;
-            dif = dop48k1 - dop28k4 - dop18k5 - dop18k6;
             dop = (a1_a16_dop)*dif;
+            cout<<i<< " " << dif.convert_to_string() << " " << a1_a16_dop.convert_to_string() << endl;
             ans += dop;
+            cout << ans.convert_to_string() << endl;
         }
         
         return ans;
+    }
+    Double pi_1_div() {
+        Double ans("0");
+        //Double c("3.4641016151377545870548926830117447338856105076207612561116139589038660338176000741622923735144971513512522828308134060599398901");
+        Double c("3.4641016151377545870548926830117447338856105076207612561116139589038660338176000741622923735144971");
+        Double a1("1"), a3_3("1"), a3("3"), k("1"), a2("2");
+        Double dop;
+        lint limit = 220;
+        for (lint i = 0; i < limit; ++i,a3_3= a3_3*a3,k+=a2) {
+            dop= (a1 / (a3_3 * k));
+            dop *= (lint)(i % 2 == 0 ? 1 : -1);
+            ans+=dop;
+        }
+        return ans*c;
+    }
+    Double pi() {
+        Double ans("0");
     }
 };
 
@@ -826,9 +827,11 @@ int main()
 {
     Double aa("1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
     Double bb("136891479058588375991326027382088315966463695625337436471480190078368997177499076593800206155688941388250484440597994042813512732765695774566001");
-    Double a("1"),b("3");
+    Double a("16"), b("1");
     lint tim = clock();
-    a=a.pi();
+    a=a.lpow(6);
+    a = b / a;
+    //a = b.pi_16();
     cout << a.convert_to_string()<<endl<<((double)(clock()-tim)/ CLOCKS_PER_SEC);
     return 0;
 }
