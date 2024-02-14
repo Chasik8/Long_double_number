@@ -210,6 +210,9 @@ void Double::formatting() {
 			v[i - sdvik] = v[i];
 			v[i] = 0;
 		}
+		for (lint i = v.size() - sdvik; i < v.size(); ++i) {
+			v[i] = 0;
+		}
 		n -= sdvik * loginf;
 		for (lint i = 0; i < n - accuracy; ++i) {
 			*this /= 10;
@@ -454,18 +457,6 @@ Double Double::operator / (const Double& bb) {
 	if (b == Double("0")) {
 		return Double("0");
 	}
-	Double a1("1");
-	if (b < a1) {
-		lint dop = b.v.size();
-		b << ((lint)(accuracy / loginf) - dop + 1);
-		a << ((lint)(accuracy / loginf) - dop + 1);
-		dop = to_string(a1.v[a1.v.size() - 1]).size() - to_string(b.v[b.v.size() - 1]).size();
-		for (lint i = 0; i < dop; ++i)
-		{
-			a *= 10;
-			b *= 10;
-		}
-	}
 	bool minus = false;
 	if (!sign()) {
 		minus = !minus;
@@ -475,36 +466,9 @@ Double Double::operator / (const Double& bb) {
 		minus = !minus;
 		b *= -1;
 	}
-	Double otw, nul("0");
+	Double otw("0"), nul("0");
 	if (a != nul) {
-		Double l("0"), r, mid, dopl("0"), dopr("0"), dop_t;
-		Double c = min_element_abs();
-		r = a;
-		lint kol = 0;
-		while ((r - l) > c) {
-			mid = (r + l);
-			mid.div2();
-			if ((mid * b) >= a) {
-				r = mid;
-			}
-			else {
-				l = mid;
-			}
-			++kol;
-		}
-		cout << kol<<endl;
-		l.clear();
-		r.clear();
-		dopr = ((r * b) - a);
-		dopr.labs();
-		dopl = ((l * b) - a);
-		dopl.labs();
-		if (dopr > dopl) {
-			otw = l;
-		}
-		else {
-			otw = r;
-		}
+		otw = a * b.reverse_number();
 	}
 	if (minus) {
 		otw *= -1;
@@ -630,16 +594,17 @@ Double Double::reverse_number() {
 	for (lint i = 0; i < a.v.size()-1; ++i) {
 		a.v[i] = 0;
 	}
+	lint flag = 0;
 	if ((lint)to_string(a.v[a.v.size() - 1]).size() + 1>loginf) {
 		a.v.resize(a.v.size() + 1, 0);
 		a.v[a.v.size() - 2] = 0;
 		a.v[a.v.size() - 1] = 1;
 	}
 	else {
-		a.v[a.v.size() - 1] = pow(10,to_string(a.v[a.v.size() - 1]).size() + 1);
+		a.v[a.v.size() - 1] = pow(10,to_string(a.v[a.v.size() - 1]).size());
 	}
 	Double ans("0"),dop("1");
-	lint limit = accuracy/2;
+	lint limit = accuracy;
 	for (lint i = 0; i < limit; ++i) {
 		lint kol = 0;
 		while (a>=*this)
@@ -652,7 +617,10 @@ Double Double::reverse_number() {
 		ans += dop;
 		a *= 10;
 	}
-	ans.n =n+ limit+to_string(v[v.size()-1]).size()+((v.size())-(lint)accuracy/loginf-1)*loginf;
+	ans.n +=limit;
+	ans.n += to_string(v[v.size() - 1]).size();
+	ans.n += ((v.size()) - ceil((double)accuracy / (double)loginf) - 1) * loginf;
+	ans.n -= 1;
 	ans.formatting();
 	return ans;
 }

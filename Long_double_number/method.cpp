@@ -31,7 +31,7 @@ using namespace Dominus;
  }
  Double Dominus::pi_16() {
 	Double ans("0"), a16("16"), a16_dop("1"), a8("8"), a1("1"), a2("2"), a4("4"), a5("5"), a6("6");
-	lint limit = 10;
+	lint limit = 79;
 	Double k("0");
 	Double dop8k;
 	Double a1_a16_dop, dif, dop;
@@ -41,7 +41,6 @@ using namespace Dominus;
 		dop = (a1_a16_dop)*dif;
 		ans += dop;
 	}
-
 	return ans;
 }
  Double Dominus::pi_1_div() {
@@ -50,7 +49,7 @@ using namespace Dominus;
 	Double c("3.4641016151377545870548926830117447338856105076207612561116139589038660338176000741622923735144971");
 	Double a1("1"), a3_3("1"), a3("3"), k("1"), a2("2");
 	Double dop;
-	lint limit = 10;
+	lint limit = 20;
 	for (lint i = 0; i < limit; ++i, a3_3 = a3_3 * a3, k += a2) {
 		dop = (a1 / (a3_3 * k));
 		dop *= (lint)(i % 2 == 0 ? 1 : -1);

@@ -19,7 +19,7 @@ typedef unsigned long long int ulint;
 typedef double lb;
 #define inf 10000
 #define loginf 4
-#define accuracy 1000
+#define accuracy 100
 #define pi 3.14159265358979323846264338327950288419716939937510
 //#include "Double.cpp"
 namespace Dominus {
