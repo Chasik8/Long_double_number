@@ -17,8 +17,8 @@ using namespace std;
 typedef long long int lint;
 typedef unsigned long long int ulint;
 typedef double lb;
-#define inf 100000
-#define loginf 5
+#define inf 10000
+#define loginf 4
 #define accuracy 1000
 #define pi 3.14159265358979323846264338327950288419716939937510
 //#include "Double.cpp"
@@ -58,10 +58,11 @@ namespace Dominus {
         Double min_element_abs();
         void labs();
         void fft(vector<complex<lb>>& a, bool invert);
-        //-----------------------------------------------------
-        void exp();
-        Double asin();
-        Double pi_16();
-        Double pi_1_div();
+        Double reverse_number();
     };
+     Double asin(const Double& aa);
+     Double pi_16();
+     Double pi_1_div();
+     Double exp(const Double& inp);
+     Double atan_1();
 }

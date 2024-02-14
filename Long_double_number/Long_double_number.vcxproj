@@ -127,9 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="arithmetic.cpp" />
     <ClCompile Include="Double.cpp" />
-    <ClCompile Include="helper_functions.cpp" />
     <ClCompile Include="method.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
