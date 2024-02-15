@@ -1,18 +1,42 @@
 #include "Double.h"
 using namespace Dominus;
 
-//class Double::Double {
-//public:
-//	void clear() {
-//		while ((v.size()) * loginf > accuracy && v[v.size() - 1] == 0)
-//		{
-//			v.pop_back();
-//		}
-//	}
-//
-//};
+lint Double::get_accuracy() {
+	return accuracy;
+}
+
+bool Double::get_mode_fast() {
+	return mode_fast;
+}
 
 Double::Double(string s) {
+	loginf = 9;
+	accuracy = 100;
+	mode_fast = false;
+	inf = pow(10, loginf);
+	n = 0;
+	if (s == "") {
+		s = "0";
+	}
+	convert(s);
+}
+Double::Double(string s, lint inp_loginf, lint inp_accuracy, bool inp_mode_fast) {
+	//if (mode_fast) {
+	//	if (loginf > 4|| loginf <1) {
+	//		cout << "Erorr: loginf<=4" << endl;
+	//		return;
+	//	}
+	//}
+	//else {
+	//	if (loginf > 9 || loginf < 1) {
+	//		cout << "Erorr: loginf<=9" << endl;
+	//		return;
+	//	}
+	//}
+	loginf = inp_loginf;
+	accuracy = inp_accuracy;
+	mode_fast = inp_mode_fast;
+	inf = pow(10, loginf);
 	n = 0;
 	if (s == "") {
 		s = "0";
@@ -20,11 +44,22 @@ Double::Double(string s) {
 	convert(s);
 }
 Double::Double() {
+	loginf = 9;
+	accuracy = 100;
+	mode_fast = false;
+	inf = pow(10, loginf);
 	n = 0;
 	string s = "0";
 	convert(s);
 }
-
+void Double::operator =(const Double& b){
+	loginf = b.loginf;
+	accuracy = b.accuracy;
+	inf = b.inf;
+	mode_fast = b.mode_fast;
+	v = b.v;
+	n = b.n;
+}
 void Double::clear() {
 	while ((v.size()) * loginf > accuracy && v[v.size() - 1] == 0)
 	{
@@ -197,15 +232,6 @@ void Double::formatting() {
 	}
 	else {
 		lint sdvik = (n - accuracy) / loginf;
-		//for (lint i = v.size() - 1; i > v.size() - sdvik; --i) {
-		//	if (i - sdvik >= 0) {
-		//		v[i - sdvik] = v[i];
-		//	}
-		//	v[i] = 0;
-		//}
-		//for (lint i = v.size() - sdvik + 1; i < v.size(); ++i) {
-		//	v[i] = 0;
-		//}
 		for (lint i = sdvik; i < v.size(); ++i) {
 			v[i - sdvik] = v[i];
 			v[i] = 0;
@@ -233,7 +259,7 @@ Double Double::min_element_abs() {
 	c.v[0] = 10;
 	return c;
 }
-void Double::fft(vector<complex<lb>>& a, bool invert) {
+void Double::fft(vector<complex<lb>>& a, bool invert) const {
 	lint n = (lint)a.size();
 	for (lint i = 1, j = 0; i < n; ++i) {
 		lint bit = n >> 1;
@@ -340,13 +366,34 @@ bool Double::operator -= (const Double& b) {
 		return false;
 	}
 }
-Double Double::operator * (const Double& bb) {
+Double Double::operator * (const Double& bb) const {
+	try
+	{
+		if (*this == Double("0") || bb == Double("0")) {
+			return  Double("0");
+		}
+		if (mode_fast) {
+			return mov_fast(bb);
+		}
+		else {
+			return mov_low(bb);
+		}
+	}
+	catch (...)
+	{
+		Double otw;
+		std::cout << "Error_operation*" << std::endl;
+		return otw;
+	}
+}
+Double Double::mov_low(const Double& bb)const {
 	try
 	{
 		Double b = bb;
 		Double a = *this;
+		Double dop_a = a;
 		bool minus = false;
-		if (!sign()) {
+		if (!a.sign()) {
 			minus = !minus;
 			a *= -1;
 		}
@@ -354,7 +401,42 @@ Double Double::operator * (const Double& bb) {
 			minus = !minus;
 			b *= -1;
 		}
-		Double inp(convert_to_string());
+		Double ans("0");
+		for (lint i = b.v.size() - 1; i >= 0; --i) {
+			a *= b.v[i];
+			ans << 1;
+			ans += a;
+			a = dop_a;
+		}
+		ans.n = a.n + b.n;
+		ans.formatting();
+		if (minus) {
+			ans *= -1;
+		}
+		return ans;
+	}
+	catch (...)
+	{
+		Double otw;
+		std::cout << "Error_operation_mov_fast" << std::endl;
+		return otw;
+	}
+}
+Double Double::mov_fast(const Double& bb) const {
+	try
+	{
+		Double b = bb;
+		Double a=*this;
+		bool minus = false;
+		if (!a.sign()) {
+			minus = !minus;
+			a *= -1;
+		}
+		if (!(b.sign())) {
+			minus = !minus;
+			b *= -1;
+		}
+		Double inp(a.convert_to_string());
 		vector<complex<lb>> fa(a.v.size(), (0, 1, 1)), fb(b.v.size());
 		for (lint i = 0; i < min(a.v.size(), b.v.size()); ++i) {
 			fa[i] = (complex<lb>)(0, (lb)a.v[i]);
@@ -374,7 +456,6 @@ Double Double::operator * (const Double& bb) {
 		while (l < max(a.v.size(), b.v.size()))  l <<= 1;
 		l <<= 1;
 		fa.resize(l), fb.resize(l);
-
 		fft(fa, false), fft(fb, false);
 		for (size_t i = 0; i < l; ++i) {
 			fa[i] *= fb[i];
@@ -383,36 +464,6 @@ Double Double::operator * (const Double& bb) {
 		lint  s_dop;
 		Double ans;
 		ans.v.resize(l, 0);
-	//	for (lint i = 0; i < l - 1; ++i) {
-	//		ans.v[i] = ((lint(fa[i].real() + 0.5)));
-	//			if (((lint(fa[i].real() + 0.5))) != 0) {
-	//	cout << "YES" << endl;
-	//}
-	//		if (ans.v[i] > inf) {
-	//			ans.v[i + 1] += ans.v[i] / (lint)inf;
-	//			ans.v[i] %= (lint)inf;
-	//		}
-	//	}
-	//	ans.v[ans.v.size() - 1] = ((lint(fa[ans.v.size() - 1].real() + 0.5)));
-	//	if (ans.v[ans.v.size() - 1] > inf) {
-	//		ans.v.resize(ans.v.size() + 1);
-	//		ans.v[ans.v.size() - 1] += ans.v[ans.v.size() - 2] / (lint)inf;
-	//		ans.v[ans.v.size() - 2] %= (lint)inf;
-	//	}
-		//ans.clear();
-		//for (lint i = l - 1; i >= 0; --i) {
-		//	s_dop = (abs(lint(fa[i].real() + 0.5)));
-		//	if (s_dop != 0) {
-		//		cout << "YES" << endl;
-		//	}
-		//	lint sdvik = ceil((double)to_string(s_dop).size() / (double)loginf)-1;
-		//	for (lint j= 0;j<=sdvik;++j) {
-		//		ans.v[i + j] += s_dop % (lint)inf;
-		//		s_dop /= (lint)inf;
-		//	}
-		//	//ans.v[i] = s_dop;
-		//}
-		//Double ans(s);
 		for (size_t i = 0; i < l; ++i)
 			ans.v[i] = lint(fa[i].real() + 0.5);
 		ans.clear();
@@ -423,20 +474,9 @@ Double Double::operator * (const Double& bb) {
 			ans.v[i] %= inf;
 		}
 		if (carry != 0) {
-			ans.v.resize(ans.v.size()+1);
+			ans.v.resize(ans.v.size() + 1);
 			ans.v[ans.v.size() - 1] += carry;
 		}
-		//for (lint i = 0; i < ans.v.size()-1; ++i) {
-		//	if (ans.v[i] > inf) {
-		//		ans.v[i + 1] += ans.v[i] / (lint)inf;
-		//		ans.v[i] %= (lint)inf;
-		//	}
-		//}
-		//if (ans.v[ans.v.size() - 1] > inf) {
-		//	ans.v.resize(ans.v.size()+1);
-		//	ans.v[ans.v.size() - 1] += ans.v[ans.v.size() - 2] / (lint)inf;
-		//	ans.v[ans.v.size() - 2] %= (lint)inf;
-		//}
 		ans.n = (n + bb.n);
 		ans.formatting();
 		ans.clear();
@@ -448,17 +488,17 @@ Double Double::operator * (const Double& bb) {
 	catch (...)
 	{
 		Double otw;
-		std::cout << "Error_operation*" << std::endl;
+		std::cout << "Error_operation_mov_fast" << std::endl;
 		return otw;
 	}
 }
-Double Double::operator / (const Double& bb) {
+Double Double::operator / (const Double& bb)const {
 	Double b = bb, a = *this;
 	if (b == Double("0")) {
 		return Double("0");
 	}
 	bool minus = false;
-	if (!sign()) {
+	if (!a.sign()) {
 		minus = !minus;
 		a *= -1;
 	}
@@ -473,18 +513,16 @@ Double Double::operator / (const Double& bb) {
 	if (minus) {
 		otw *= -1;
 	}
-	otw.n = a.n;
-	otw.clear();
 	return otw;
 }
-bool Double::operator < (const Double& b) {
+bool Double::operator < (const Double& b) const {
 	Double c = *this;
 	c -= b;
 	if (c.sign())
 		return  false;
 	return  true;
 }
-bool Double::operator <= (const Double& b) {
+bool Double::operator <= (const Double& b) const{
 	Double c = *this;
 	if (c == b) {
 		return  true;
@@ -494,7 +532,7 @@ bool Double::operator <= (const Double& b) {
 		return  true;
 	return  false;
 }
-bool Double::operator > (const Double& b) {
+bool Double::operator > (const Double& b)const {
 	Double c = *this;
 	if (c == b) {
 		return  false;
@@ -504,7 +542,7 @@ bool Double::operator > (const Double& b) {
 		return  true;
 	return  false;
 }
-bool Double::operator >= (const Double& b) {
+bool Double::operator >= (const Double& b)const {
 	Double c = *this;
 	c -= b;
 	if (c.sign())
@@ -512,7 +550,7 @@ bool Double::operator >= (const Double& b) {
 	return  false;
 
 }
-bool Double::operator != (const Double& b) {
+bool Double::operator != (const Double& b) const {
 	if (v.size() > b.v.size()) {
 		return  true;
 	}
@@ -528,7 +566,7 @@ bool Double::operator != (const Double& b) {
 	}
 	return  false;
 }
-bool Double::operator == (const Double& b) {
+bool Double::operator == (const Double& b)const {
 	return !(*this != b);
 }
 void Double::operator >>(lint kol) {
@@ -559,7 +597,7 @@ bool Double::operator << (lint kol) {
 	}
 }
 
-Double Double::operator + (const Double& b) {
+Double Double::operator + (const Double& b) const {
 	try
 	{
 		Double c;
@@ -574,7 +612,7 @@ Double Double::operator + (const Double& b) {
 		return c;
 	}
 }
-Double Double::operator - (const Double& b) {
+Double Double::operator - (const Double& b) const {
 	try
 	{
 		Double c;
@@ -617,69 +655,17 @@ Double Double::reverse_number() {
 		ans += dop;
 		a *= 10;
 	}
+	Double dop1("1");
 	ans.n +=limit;
-	ans.n += to_string(v[v.size() - 1]).size();
-	ans.n += ((v.size()) - ceil((double)accuracy / (double)loginf) - 1) * loginf;
+	ans.n += to_string(v[v.size() - 1]).size()- to_string(dop1.v[dop1.v.size() - 1]).size();
+	if (((v.size()) - (ceil)((double)accuracy / (double)loginf)) > 0) {
+		ans.n += ((v.size()) - (ceil)((double)accuracy / (double)loginf)) * loginf;
+	}
 	ans.n -= 1;
 	ans.formatting();
 	return ans;
 }
-//    void lswap (Double& a,Double& b) {
-//        swap(a.v,b.v);
-//        swap(a.n, b.n);
-//    }
-//    ulint size() {
-//        return v.size();
-//    }
-//    // количество разр€ов не больше чем 10^9
-//    void copy(Double& a) {
-//        v = a.v;
-//        n = a.n;
-//    }
-//    Double lpow(lint b) {
-//        Double c1=*this;
-//        Double c2 = *this;
-//        for (lint i = 0; i < b; ++i) {
-//            c1 =c1*c2;
-//        }
-//        return c1;
-//    }
-//    lint operator [] (lint i) {
-//        try
-//        {
-//            return v[i];
-//        }
-//        catch (...)
-//        {
-//            std::cout << "Error_operation+" << std::endl;
-//            return 0;
-//        }
-//    }
-//    Double max_element_abs() {
-//        string str_c = "";
-//        for (lint i = 0; i < 10; ++i) {
-//            str_c += "0";
-//        }
-//        str_c += "1";
-//        reverse(str_c.begin(), str_c.end());
-//        Double c(str_c);
-//        return c;
-//    }
-//    Double reverse_number_newton() {
-//        lint kol = accuracy / loginf;
-//        Double c = *this;
-//        c >> (v.size()- kol-1);
-//        for (lint i = 0; i < accuracy - loginf * kol; ++i) {
-//            c /= 10;
-//        }
-//        Double a1("1"),x=c;
-//        for (lint i = 0; i < accuracy; ++i) {
-//            x += (a1 - c * x);
-//        }
-//        x >> (v.size() - kol - 1);
-//        for (lint i = 0; i < accuracy - loginf * kol; ++i) {
-//            x /= 10;
-//        }
-//        return x;
-//    }
-
+void Double::N(lint inp) {
+	n += inp;
+	formatting();
+}

@@ -17,52 +17,56 @@ using namespace std;
 typedef long long int lint;
 typedef unsigned long long int ulint;
 typedef double lb;
-#define inf 10000
-#define loginf 4
-#define accuracy 100
-#define pi 3.14159265358979323846264338327950288419716939937510
 //#include "Double.cpp"
 namespace Dominus {
     class Double
     {
     private:
+        const double pi= 3.141592653589793;
+        lint inf;
+        lint loginf;
+        lint accuracy;
+        bool mode_fast;
         vector<lint> v;
         ulint n;
-    public:
-        Double(string s);
-        Double();
-        //-----------------------------------------------------
-        bool operator += (const Double& b);
-        Double operator + (const Double& b);
-        bool operator -= (const Double& b);
-        Double operator - (const Double& b);
-        Double operator * (const Double& bb);
-        bool operator /= (lint k);
-        bool operator *=(lint b);
-        Double operator / (const Double& bb);
-        bool operator < (const Double& b);
-        bool operator <= (const Double& b);
-        bool operator > (const Double& b);
-        bool operator >= (const Double& b);
-        bool operator != (const Double& b);
-        bool operator == (const Double& b);
-        bool operator << (lint kol);
-        void operator >>(lint kol);
-        //-----------------------------------------------------
         void clear();
         bool sign();
-        void convert(string a);
         void formatting();
-        string convert_to_string();
         void div2();
         Double min_element_abs();
         void labs();
-        void fft(vector<complex<lb>>& a, bool invert);
+        void fft(vector<complex<lb>>& a, bool invert)const;
         Double reverse_number();
+    public:
+        explicit Double(string s);
+        explicit Double(string s,lint loginf,lint accuracy,bool mode_fast);
+        explicit Double();
+        //-----------------------------------------------------
+        void operator = (const Double& b);
+        bool operator += (const Double& b);
+        Double operator + (const Double& b)const;
+        bool operator -= (const Double& b);
+        Double operator - (const Double& b)const;
+        Double operator * (const Double& bbconst)const;
+        bool operator /= (lint k);
+        bool operator *=(lint b);
+        Double operator / (const Double& bb)const;
+        bool operator < (const Double& b)const;
+        bool operator <= (const Double& b)const;
+        bool operator > (const Double& b)const;
+        bool operator >= (const Double& b)const;
+        bool operator != (const Double& b)const;
+        bool operator == (const Double& b)const;
+        bool operator << (lint kol);
+        void operator >>(lint kol);
+        Double mov_fast(const Double& bb)const;
+        Double mov_low(const Double& bb)const;
+        //-----------------------------------------------------
+        string convert_to_string();
+        void convert(string a);
+        void N(lint inp);
+        lint get_accuracy();
+        bool get_mode_fast();
     };
-     Double asin(const Double& aa);
      Double pi_16();
-     Double pi_1_div();
-     Double exp(const Double& inp);
-     Double atan_1();
 }
