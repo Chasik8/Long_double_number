@@ -1,15 +1,23 @@
-#include "Double.h" 
+#include "class_lib/Double.h"
+
 using namespace Dominus;
 int main()
 {
-	//Double aa("1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-	//Double bb("136891479058588375991326027382088315966463695625337436471480190078368997177499076593800206155688941388250484440597994042813512732765695774566001");
-	//Double a("1",4,100,true), b("7000000001",4, 100, true);
-	//Double ans("1", 4, 100, true);
-	Double a("1"), b("7000000001");
-	Double ans("1");
+    lint acc;
+    cout<<"accuracy: ";
+    cin>> acc;
+    lint li = 9;
+    lint mode = false;
+    if (acc <=150){
+        li=9;
+        mode=false;
+    }else {
+        li =4;
+        mode=true;
+    }
+    Dominus::Double ans("1",li, acc,mode);
 	lint tim = clock();
-	ans = pi_16();
+	ans = Dominus::pi_16(li, acc, mode);
 	cout << ans.convert_to_string() << endl << ((double)(clock() - tim) / CLOCKS_PER_SEC) << endl;
 	return 0;
 }

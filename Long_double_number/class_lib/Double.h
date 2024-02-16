@@ -21,15 +21,15 @@ typedef double lb;
 namespace Dominus {
     class Double
     {
+
     private:
-        const double pi= 3.141592653589793;
-        lint inf;
         lint loginf;
+        lint inf;
         lint accuracy;
         bool mode_fast;
-        vector<lint> v;
-        ulint n;
-        void clear();
+        const double pi= 3.141592653589793;
+        vector<lint> mantissa;
+        ulint point;
         bool sign();
         void formatting();
         void div2();
@@ -39,15 +39,15 @@ namespace Dominus {
         Double reverse_number();
     public:
         explicit Double(string s);
-        explicit Double(string s,lint loginf,lint accuracy,bool mode_fast);
-        explicit Double();
+        explicit Double(string s, lint loginf, lint accuracy, bool mode_fast);
+        Double();
         //-----------------------------------------------------
         void operator = (const Double& b);
         bool operator += (const Double& b);
-        Double operator + (const Double& b)const;
+        Double operator + (const Double& b) const;
         bool operator -= (const Double& b);
-        Double operator - (const Double& b)const;
-        Double operator * (const Double& bbconst)const;
+        Double operator - (const Double& b) const;
+        Double operator * (const Double& bbconst) const;
         bool operator /= (lint k);
         bool operator *=(lint b);
         Double operator / (const Double& bb)const;
@@ -62,11 +62,12 @@ namespace Dominus {
         Double mov_fast(const Double& bb)const;
         Double mov_low(const Double& bb)const;
         //-----------------------------------------------------
+        void clear();
         string convert_to_string();
         void convert(string a);
         void N(lint inp);
         lint get_accuracy();
         bool get_mode_fast();
     };
-     Double pi_16();
+     Double pi_16(lint li, lint acc, bool mode);
 }

@@ -1,0 +1,30 @@
+cmake_minimum_required(VERSION 3.9)
+
+project(Long_double_number)
+
+set(SOURCE_LIB class_lib/Double.cpp class_lib/Double.h method.cpp)
+set(SOURCE_EXE class_lib/Double.cpp class_lib/Double.h method.cpp Source.cpp)
+
+add_library(Double SHARED  ${SOURCE_LIB})
+
+add_executable(Source ${SOURCE_EXE})
+
+#target_link_libraries(class_lib/cmake-build-debug/libClass.a)
+libgcc_s_seh-1.dll
+
+
+
+cmake_minimum_required(VERSION 3.26)
+project(Long_double_number)
+
+add_executable(app)
+target_sources(app PRIVATE Source.cpp method.cpp class_lib/Double.cpp class_lib/Double.h)
+install(TARGETS app)
+#set(CMAKE_CXX_STANDARD 17)
+#add_executable(Long_double_number main.cpp)
+#set(SOURCE_LIB class_lib/Double.cpp class_lib/Double.h method.cpp)
+#set(SOURCE_EXE class_lib/Double.cpp class_lib/Double.h method.cpp Source.cpp)
+#add_library(Double STATIC  ${SOURCE_LIB})
+#set ( CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON )
+#add_executable(Source ${SOURCE_EXE})
+#target_link_libraries(cmake-build-debug/libDouble.dll cmake-build-debug/libDouble.dll.a)

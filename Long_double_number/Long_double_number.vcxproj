@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <VCProjectVersion>16.0</VCProjectVersion>
+    <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{3088f04f-f335-4101-b6b0-bce804dffdbb}</ProjectGuid>
+    <ProjectGuid>{9a90fc08-cd1c-4f16-8cf2-f7784c05768c}</ProjectGuid>
     <RootNamespace>Longdoublenumber</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -127,12 +127,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Double.cpp" />
+    <ClCompile Include="class_lib\Double.cpp" />
     <ClCompile Include="method.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Double.h" />
+    <ClInclude Include="class_lib\Double.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

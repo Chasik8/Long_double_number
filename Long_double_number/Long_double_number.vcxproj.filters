@@ -15,18 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Double.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="Source.cpp">
+    <ClCompile Include="class_lib\Double.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="method.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Source.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Double.h">
+    <ClInclude Include="class_lib\Double.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

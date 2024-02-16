@@ -1,0 +1,3 @@
+D:/Project/C++/VisualStudioproject/C++/Long_double_number/Long_double_number/class_lib/cmake-build-debug/CMakeFiles/Class.dir
+D:/Project/C++/VisualStudioproject/C++/Long_double_number/Long_double_number/class_lib/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/Project/C++/VisualStudioproject/C++/Long_double_number/Long_double_number/class_lib/cmake-build-debug/CMakeFiles/rebuild_cache.dir

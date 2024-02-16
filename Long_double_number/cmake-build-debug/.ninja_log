@@ -1,0 +1,10 @@
+# ninja log v5
+1	160	7298142562884093	build.ninja	caa4fb7413910a2a
+653	1171	7297386850686294	Source.exe	2a19f9f38a959f16
+10	704	7297396860724385	CMakeFiles/Source.dir/Source.cpp.obj	b15c99ec14fe886d
+6	738	7297396861084333	CMakeFiles/Source.dir/method.cpp.obj	e54b120d60c6028b
+6	1269	7297397186794745	CMakeFiles/Source.dir/class_lib/Double.cpp.obj	a15f3f03285473a8
+14	781	7298142591916280	CMakeFiles/Source.dir/Source.cpp.obj	b15c99ec14fe886d
+9	815	7298142592276275	CMakeFiles/Source.dir/method.cpp.obj	e54b120d60c6028b
+4	1099	7298142595096258	CMakeFiles/Source.dir/class_lib/Double.cpp.obj	a15f3f03285473a8
+1099	2972	7298142613457372	Source.exe	2a19f9f38a959f16

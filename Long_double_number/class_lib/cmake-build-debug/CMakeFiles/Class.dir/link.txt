@@ -1,0 +1,2 @@
+D:\Soft\CLION2~1.2\bin\mingw\bin\ar.exe qc libClass.a CMakeFiles/Class.dir/Double.cpp.obj
+D:\Soft\CLION2~1.2\bin\mingw\bin\ranlib.exe libClass.a
