@@ -17,7 +17,6 @@ using namespace std;
 typedef long long int lint;
 typedef unsigned long long int ulint;
 typedef double lb;
-//#include "Double.cpp"
 namespace Dominus {
 	class Double
 	{
