@@ -20,7 +20,7 @@ This project is a C++ application developed using Visual Studio. It focuses on p
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/Long_double_number.git
+    git clone https://github.com/Chasik8/Long_double_number.git
     ```
 2. Open the project in Visual Studio:
     ```sh
